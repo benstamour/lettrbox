@@ -1,0 +1,1109 @@
+:root
+{
+	--1a: #fffca6;
+	--1b: #ffe76b;
+	--1c: #ffd36b; 
+	--2a: #ecd9ff;
+	--2b: #c5a6f7;
+	--2c: #ae94f2;
+	--3a: #d9ffde;
+	--3b: #a3f7bc;
+	--3c: #75eba9;
+	--4a: #ffd9f9;
+	--4b: #f7a3e2;
+	--4c: #f089ca;
+	--5a: #d9fffe;
+	--5b: #a3f5f7;
+	--5c: #85e8ed;
+	--6a: white;
+	--6b: #e5e1e6;
+	--6c: #ccc7d1;
+	--7a: white;
+	--7b: #ededed;
+	--7c: #dedede;
+	
+	--backgroundColour: white;
+	--fontColour: black;
+}
+
+/* LOADER */
+.loader-container
+{
+    height: 100vh;
+	background-color: black;
+}
+.spinner
+{
+	top: 40%;
+	position: fixed;
+	text-align: center;
+	line-height: 1em;
+	text-indent: -0.000001em;
+	filter: blur(0);
+	-webkit-animation: spin 2s linear infinite;
+	-moz-animation: spin 2s linear infinite;
+	-ms-animation: spin 2s linear infinite;
+	-o-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
+	color: var(--accentcolour);
+	background-image: conic-gradient(color-mix(in srgb, black 0%, rgba(0, 0, 0, 0)), color-mix(in srgb, black 0%, rgba(0, 0, 0, 0)) 10%, var(--2b) 20%, var(--5b) 40%, var(--3b) 60%, var(--1b) 80%, var(--4b) 100%);
+	background-size: 100%;
+	-webkit-background-clip: text;
+	-moz-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	-moz-text-fill-color: transparent;
+}
+@keyframes spin
+{
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+body
+{
+	font-family: Lexend;
+	background-color: var(--backgroundColour);
+	color: var(--fontColour);
+}
+body::selection
+{
+	background-color: black;
+	color: var(--5b);
+}
+
+.header
+{
+	background-color: black;
+	color: white;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	/*margin-bottom: 15px;*/
+	
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	flex-wrap: nowrap;
+}
+.header .heading
+{
+	margin: 0 !important;
+	font-family: Iceland;
+	font-size: 72px;
+	line-height: 0.75;
+	font-weight: bold;
+}
+/* heading on front page */
+.bigheading
+{
+	font-size: calc(30*min(1vw, 1vh)) !important;
+}
+.header .fa-xl
+{
+	margin-left: 15px;
+	color: white;
+}
+.iconlink
+{
+	text-decoration: none;
+}
+.modal-title
+{
+	font-family: Iceland;
+	font-size: 28px;
+	line-height: 0.75;
+}
+.subheading
+{
+	font-family: Iceland;
+	font-size: 28px;
+	line-height: 0.75;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-weight: bold;
+	text-align: center;
+}
+.game
+{
+	margin-top: 15px;
+}
+.container-fluid
+{
+	margin: 0 !important;
+	padding: 0 !important;
+	max-width: 100% !important;
+}
+.row
+{
+	padding: 0;
+	margin: 0;
+}
+
+/* buttons on home page */
+.startbuttongroup
+{
+	position: absolute;
+	top: 40%;
+	left: calc(50% - 77.5px);
+}
+.startbutton
+{
+	border-width: 5px;
+	border-radius: 25px;
+	font-size: 20px;
+	width: 165px;
+	transition-duration: 500ms;
+	transition-property: border-radius;
+}
+body:not(.darkmode) .startbutton
+{
+	-webkit-animation: colourchange 10s linear infinite;
+	-moz-animation: colourchange 10s linear infinite;
+	-ms-animation: colourchange 10s linear infinite;
+	-o-animation: colourchange 10s linear infinite;
+    animation: colourchange 10s linear infinite;
+	border-color: var(--fontColour);
+	color: var(--fontColour);
+}
+body.darkmode .startbutton
+{
+	-webkit-animation: colourchange-dark 10s linear infinite;
+	-moz-animation: colourchange-dark 10s linear infinite;
+	-ms-animation: colourchange-dark 10s linear infinite;
+	-o-animation: colourchange-dark 10s linear infinite;
+    animation: colourchange-dark 10s linear infinite;
+}
+@keyframes colourchange
+{
+    0%
+    {
+        background-color: var(--4b);
+    }
+    20%
+    {
+        background-color: var(--1b);
+    }
+    40%
+    {
+        background-color: var(--3b);
+    }
+    60%
+    {
+        background-color: var(--5b);
+    }
+    80%
+    {
+        background-color: var(--2b);
+    }
+    100%
+    {
+        background-color: var(--4b);
+    }
+}
+@keyframes colourchange-dark
+{
+    0%
+    {
+        border-color: var(--4b);
+		color: var(--4b);
+    }
+    20%
+    {
+        border-color: var(--1b);
+        color: var(--1b);
+    }
+    40%
+    {
+        border-color: var(--3b);
+        color: var(--3b);
+    }
+    60%
+    {
+        border-color: var(--5b);
+        color: var(--5b);
+    }
+    80%
+    {
+        border-color: var(--2b);
+        color: var(--2b);
+    }
+    100%
+    {
+        border-color: var(--4b);
+        color: var(--4b);
+    }
+}
+body.darkmode .startbutton:active, body.darkmode .startbutton:focus, body.darkmode .startbutton:hover
+{
+	background-color: transparent !important;
+	font-weight: bold;
+}
+body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus, body:not(.darkmode) .startbutton:hover
+{
+	color: var(--fontColour) !important;
+	border-color: var(--fontColour) !important;
+	font-weight: bold;
+}
+.startbutton:hover
+{
+	border-radius: 0px;
+	transition-duration: 500ms;
+	transition-property: border-radius;
+}
+
+/* grid for tiles during game */
+.box
+{
+	border: 5px outset var(--fontColour);
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+/* area above tiles during game */
+.overhead
+{
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+.tile
+{
+	border: 3px outset #ccc;
+	border-radius: 5px;
+	text-align: center;
+	font-family: Righteous;
+	font-size: 36px;
+	padding: 0px;
+	width: 50px;
+	height: 50px;
+	max-width: 50px;
+	max-height: 50px;
+	padding: 0px;
+	background-color: white;
+	color: black;
+}
+.emptytile
+{
+	border: 3px solid transparent;
+	border-radius: 5px;
+	width: 50px;
+	height: 50px;
+	background-color: transparent;
+}
+/* ensures tiles are square */
+.fixed-height
+{
+	width: 50px;
+	height: 50px;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+.tile p
+{
+	margin: -5px 6px 0px 0px;
+	padding: 0px;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* highlight tiles that are part of a word before removing them */
+.vanquishX
+{
+	outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 10px 5px #9ecaed;
+}
+.vanquishY
+{
+	outline: none;
+    border-color: #ed9eca;
+    box-shadow: 0 0 10px 5px #ed9eca;
+}
+.vanquishZ
+{
+	outline: none;
+    border-color: #c6b4dc;
+    box-shadow: 0 0 10px 5px #c6b4dc;
+}
+
+/* gem tiles */
+.tile1
+{
+	/* gold */
+	--c1: var(--1a);
+	--c2: var(--1b);
+	--c3: var(--1c);
+}
+.tile2
+{
+	/* amethyst */
+	--c1: var(--2a);
+	--c2: var(--2b);
+	--c3: var(--2c);
+}
+.tile3
+{
+	/* emerald */
+	--c1: var(--3a);
+	--c2: var(--3b);
+	--c3: var(--3c);
+}
+.tile4
+{
+	/* kunzite */
+	--c1: var(--4a);
+	--c2: var(--4b);
+	--c3: var(--4c);
+}
+.tile5
+{
+	/* aquamarine */
+	--c1: var(--5a);
+	--c2: var(--5b);
+	--c3: var(--5c);
+}
+.tile6
+{
+	/* diamond */
+	--c1: var(--6a);
+	--c2: var(--6b);
+	--c3: var(--6c);
+}
+.tile7
+{
+	/* prismatic */
+	--c1: var(--7a);
+	--c2: var(--7b);
+	--c3: var(--7c);
+}
+/* extra gem tiles (unused) */
+.tile8
+{
+	/* peridot */
+	--c1: #ebffbf;
+	--c2: #c7f28a;
+	--c3: #abf067;
+}
+.tile9
+{
+	/* ruby */
+	--c1: #f5c1cc;
+	--c2: #f58491;
+	--c3: #ed6666;
+}
+.tile10
+{
+	/* sapphire */
+	--c1: #c9dbf5;
+	--c2: #a1bdf0;
+	--c3: #8aa2eb;
+}
+.tile11
+{
+	/* spessartine */
+	--c1: #f2d8bb;
+	--c2: #f0b792;
+	--c3: #f09c7f;
+}
+.tile12
+{
+	/* onyx */
+	--c1: #555557;
+	--c2: #474747;
+	--c3: #2e2e2e;
+	color: white;
+}
+.gemtile
+{
+	/*max-width: 44px;
+	max-height: 44px;*/
+	
+	--s: 39px; /* size */
+	--_g:var(--c3) 15%,var(--c2) 0 28%,#0000 0 72%,var(--c2) 0 85%,var(--c3) 0;
+	background:
+		conic-gradient(from 90deg at 2px 2px,#0000 25%,var(--c3) 0) -1px -1px,
+		linear-gradient(-45deg,var(--_g)),linear-gradient(45deg,var(--_g)),
+		conic-gradient(from 90deg at 40% 40%,var(--c1) 25%,var(--c2) 0)
+		calc(var(--s)/-5) calc(var(--s)/-5);
+	background-size: var(--s) var(--s);
+
+	border-width: 6px;
+	border-color: rgba(255,255,255,0.5) rgba(0, 0, 0,0.1) rgba(0, 0, 0,0.2) rgba(255,255,255,0.2);
+}
+.tile7
+{
+	/* prismatic - adds gradient overlay */
+	background:
+		radial-gradient(#ffffffaa 0% 20%, #ffffff33 50%, transparent 90%),
+		conic-gradient(#ed3bd066, #edc63b66, #3bed4166, #3be7ed66, #8e3bed66, #ed3bd066),
+		conic-gradient(from 90deg at 2px 2px,#0000 25%,var(--c3) 0) -1px -1px,
+		linear-gradient(-45deg,var(--_g)),linear-gradient(45deg,var(--_g)),
+		conic-gradient(from 90deg at 40% 40%,var(--c1) 25%,var(--c2) 0)
+		calc(var(--s)/-5) calc(var(--s)/-5);
+}
+.tileP
+{
+	/* petrified tile */
+	--s: 45px;
+	--c1: #c2c2c2;
+	--c2: #9c9c9c;
+
+	background:
+		radial-gradient(var(--c1) 14%,var(--c2) 15% 30%,var(--c1) 31% 44%,var(--c2) 45% 60%,#0000 61%),
+		linear-gradient( 45deg,#0000 46%,var(--c2) 0 54%,#0000 0),
+		linear-gradient(-45deg,#0000 46%,var(--c2) 0 54%,#0000 0) var(--c1);
+	background-size: var(--s) var(--s);
+	border-color: #595959;
+}
+.tileW
+{
+	/* warp tile */
+	--s: 60px;
+	--c1: #ff9d61;
+	--c2: #ffca8a;
+  
+	--_g: 
+		var(--c1) 0%  5% ,var(--c2) 6%  15%,var(--c1) 16% 25%,var(--c2) 26% 35%,var(--c1) 36% 45%,
+		var(--c2) 46% 55%,var(--c1) 56% 65%,var(--c2) 66% 75%,var(--c1) 76% 85%,var(--c2) 86% 95%,
+		#0000 96%;
+	background:
+		radial-gradient(50% 50% at 100% 0,var(--_g)),
+		radial-gradient(50% 50% at 0 100%,var(--_g)),
+		radial-gradient(50% 50%,var(--_g)),
+		radial-gradient(50% 50%,var(--_g)) calc(var(--s)/2) calc(var(--s)/2)
+		var(--c1);
+	background-size: var(--s) var(--s);
+	
+	border-color: #96532a;
+}
+.tileF
+{
+  --s: 30px; /* control the size*/
+  --c1: #e0ffbf;
+  --c2: #b1ed72;
+  
+  background:
+    conic-gradient(#0000 75%,var(--c1) 0) 0 calc(var(--s)/4),
+    conic-gradient(from 45deg,var(--c1) 25%,var(--c2) 0);
+  background-size: var(--s) var(--s);
+  border-color: #75b037;
+}
+.tileC
+{
+	--s: 10px; /* control the size*/
+	--c1: #93baf5;
+	--c2: #c3d9fa;
+	--c3: #c3d9fa;
+
+	--b: calc(var(--s)/2.67); /* control the thickness of the wavy line */
+
+	--_r: calc(1.28*var(--s) + var(--b)/2) at left 50%;
+	--_f: calc(100% - var(--b)),var(--c1) calc(101% - var(--b)) 100%,#0000 101%;
+	--g0: calc(-.8*var(--s)),var(--c2) var(--_f);
+	--g1: calc(-.8*var(--s)),var(--c3) var(--_f);
+	--_s: calc(1.5*var(--s) + var(--b));
+	background: 
+		radial-gradient(var(--_r) bottom var(--g0)) calc(2*var(--s)) calc(-1*var(--_s)),
+		radial-gradient(var(--_r) bottom var(--g1)) calc(-1*var(--s)) calc(var(--_s)/-2),
+		radial-gradient(var(--_r) top    var(--g1)) 0 var(--_s),
+		radial-gradient(var(--_r) top    var(--g0)) var(--s) calc(var(--_s)/ 2),
+		linear-gradient(var(--c2) 50%,var(--c3) 0);
+	background-size: calc(4*var(--s)) var(--_s);
+	border-color: #4b7fcc;
+}
+.tileV
+{
+	background-color: #383838;
+	color: white;
+	border-color: #141414;
+}
+.tileU p
+{
+	transform: rotateY(180deg);
+}
+
+/*
+
+onyx:
+--c1: #555557;
+--c2: #474747;
+--c3: #2e2e2e;
+color: white;
+
+watermelon:
+conic-gradient(from -15deg, #f2418e66 0deg 50deg, #fae1ed66 80deg, #d0f2dd66 100deg, #6cf09866 130deg 230deg, #d0f2dd66 260deg, #fae1ed66 280deg, #f2418e66 310deg)
+
+blue/purple tests:
+
+--c1: #adf0ff;
+--c2: #82d0fa;
+--c3: #5fa2fa;
+
+--c1: #ade1ff;
+--c2: #9bb6fa;
+--c3: #a285f2;
+
+*/
+
+.gemtile .fixed-height
+{
+	width: 44px;
+	height: 44px;
+}
+.gemtile p
+{
+	margin: -10px 5px 0px 0px;
+}
+/* for when tiles get upgraded */
+.gemspin, .gridflip
+{
+	transition: 0.5s;
+	transform: rotateY(360deg);
+}
+/* warp tile animation */
+.warpspin p
+{
+	transition: 0.5s;
+	transform: rotateZ(360deg);
+}
+
+/* displaying list of gem tiles in instructions */
+.gemtable
+{
+	margin-left: auto;
+	margin-right: auto;
+}
+.gemtable td
+{
+	padding: 5px;
+}
+.gemtable .tile p
+{
+	margin: -8px 6px 0px 0px;
+}
+
+.gridcloaked .tile
+{
+	background: transparent;
+	background-color: #264778;
+	border: 3px outset #172d4d;
+	border-radius: 0px;
+	color: transparent;
+	transition-property: background, background-color, border, border-radius, color;
+}
+.gridcloaked tr:nth-child(1) .tile
+{
+	transition-duration: 0.3s;
+}
+.gridcloaked tr:nth-child(2) .tile
+{
+	transition-duration: 0.4s;
+}
+.gridcloaked tr:nth-child(3) .tile
+{
+	transition-duration: 0.5s;
+}
+.gridcloaked tr:nth-child(4) .tile
+{
+	transition-duration: 0.6s;
+}
+.gridcloaked tr:nth-child(5) .tile
+{
+	transition-duration: 0.7s;
+}
+.gridcloaked tr:nth-child(6) .tile
+{
+	transition-duration: 0.8s;
+}
+
+/* sidebar table on right side, movetable on left, mobile table appears at top on small screens */
+.sidebartable, .movetable, .mobiletable
+{
+	border: 3px outset var(--fontColour);
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: separate;
+	border-spacing: 0;
+	width: 100%;
+}
+.sidebartable td, .movetable th
+{
+	padding: 8px;
+}
+.sidebartable .tile, .mobiletable .tile
+{
+	margin-left: auto;
+	margin-right: auto;
+}
+.sidebartable .tile p, .mobiletable .tile p
+{
+	margin: -4px 5px 0px 0px;
+}
+.sidebartable .gemtile p, .mobiletable .gemtile p
+{
+	margin: -7px 6px 0px 0px;
+}
+.movetable
+{
+	font-family: Righteous;
+	font-size: 18px;
+}
+.movetable td
+{
+	padding: 0px 8px;
+}
+.mobiletable td
+{
+	width: 33.33% !important;
+}
+.bonusword
+{
+	font-family: Righteous;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 28px;
+}
+.levelupScore
+{
+	font-size: 20px;
+}
+
+/* for coloured/glowing text - depends on whether light/dark mode is activated */
+body:not(.darkmode) .score1
+{
+	/*color: var(--1c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--1c), 0 0 5px var(--1c), 0 0 10px var(--1c);
+}
+body:not(.darkmode) .score2
+{
+	/*color: var(--2c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--2c), 0 0 5px var(--2c), 0 0 10px var(--2c);
+}
+body:not(.darkmode) .score3
+{
+	/*color: var(--3c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--3c), 0 0 5px var(--3c), 0 0 10px var(--3c);
+}
+body:not(.darkmode) .score4
+{
+	/*color: var(--4c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--4c), 0 0 5px var(--4c), 0 0 10px var(--4c);
+}
+body:not(.darkmode) .score5
+{
+	/*color: var(--5c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--5c), 0 0 5px var(--5c), 0 0 10px var(--5c);
+}
+body:not(.darkmode) .score6
+{
+	/*color: var(--6c);*/
+	color: var(--fontColour);
+	text-shadow: 0 0 1px var(--6c), 0 0 5px var(--6c), 0 0 10px var(--6c);
+}
+body:not(.darkmode) .score7
+{
+	/*background-image: linear-gradient(var(--4c), var(--1c), var(--3c), var(--5c), var(--2c));
+    color: transparent;
+    background-clip: text;*/
+	/*text-shadow: 0 0 1px var(--4c), 0 0 3px var(--4c), 0 0 5px var(--4c), 0 0 8px var(--1c), 0 0 11px var(--1c), 0 0 15px var(--1c), 0 0 18px var(--3c), 0 0 20px var(--3c), 0 0 22px var(--5c), 0 0 24px var(--5c), 0 0 26px var(--2c), 0 0 28px var(--2c);*/
+	/*text-shadow: 0 0 1px var(--4c), 0 0 8px var(--1c), 0 0 18px var(--3c), 0 0 22px var(--5c), 0 0 26px var(--2c);*/
+}
+body.darkmode .score1
+{
+	color: var(--1b);
+}
+body.darkmode .score2
+{
+	color: var(--2b);
+}
+body.darkmode .score3
+{
+	color: var(--3b);
+}
+body.darkmode .score4
+{
+	color: var(--4b);
+}
+body.darkmode .score5
+{
+	color: var(--5b);
+}
+body.darkmode .score6
+{
+	color: var(--6b);
+}
+
+/* for coloured buttons - depends on whether light/dark mode is activated */
+body:not(.darkmode) .button1, body:not(.darkmode) .button2, body:not(.darkmode) .button3, body:not(.darkmode) .button4, body:not(.darkmode) .button5, body:not(.darkmode) .button6
+{
+	color: var(--fontColour) !important;
+}
+body:not(.darkmode) .button1
+{
+	background-color: var(--1b);
+}
+body:not(.darkmode) .button2
+{
+	background-color: var(--2b);
+}
+body:not(.darkmode) .button3
+{
+	background-color: var(--3b);
+}
+body:not(.darkmode) .button4
+{
+	background-color: var(--4b);
+}
+body:not(.darkmode) .button5
+{
+	background-color: var(--5b);
+}
+body:not(.darkmode) .button6
+{
+	background-color: var(--6b);
+}
+body:not(.darkmode) .button1:active, body:not(.darkmode) .button1:hover, body:not(.darkmode) .button1:focus
+{
+	background-color: var(--1c);
+}
+body:not(.darkmode) .button2:active, body:not(.darkmode) .button2:hover, body:not(.darkmode) .button2:focus
+{
+	background-color: var(--2c);
+}
+body:not(.darkmode) .button3:active, body:not(.darkmode) .button3:hover, body:not(.darkmode) .button3:focus
+{
+	background-color: var(--3c);
+}
+body:not(.darkmode) .button4:active, body:not(.darkmode) .button4:hover, body:not(.darkmode) .button4:focus
+{
+	background-color: var(--4c);
+}
+body:not(.darkmode) .button5:active, body:not(.darkmode) .button5:hover, body:not(.darkmode) .button5:focus
+{
+	background-color: var(--5c);
+}
+body:not(.darkmode) .button6:active, body:not(.darkmode) .button6:hover, body:not(.darkmode) .button6:focus
+{
+	background-color: var(--6c);
+}
+body.darkmode .button1, body.darkmode .button2, body.darkmode .button3, body.darkmode .button4, body.darkmode .button5, body.darkmode .button6
+{
+	background-color: transparent;
+}
+body.darkmode .button1
+{
+	color: var(--1b);
+	border: 3px solid var(--1b) !important;
+}
+body.darkmode .button2
+{
+	color: var(--2b);
+	border: 3px solid var(--2b) !important;
+}
+body.darkmode .button3
+{
+	color: var(--3b);
+	border: 3px solid var(--3b) !important;
+}
+body.darkmode .button4
+{
+	color: var(--4b);
+	border: 3px solid var(--4b) !important;
+}
+body.darkmode .button5
+{
+	color: var(--5b);
+	border: 3px solid var(--5b) !important;
+}
+body.darkmode .button6
+{
+	color: var(--6b);
+	border: 3px solid var(--6b) !important;
+}
+body.darkmode .button1:hover, .button1:active, .button1:focus
+{
+	background-color: var(--1b);
+	color: var(--backgroundColour);
+}
+body.darkmode .button2:hover, .button2:active, .button2:focus
+{
+	background-color: var(--2b);
+	color: var(--backgroundColour);
+}
+body.darkmode .button3:hover, .button3:active, .button3:focus
+{
+	background-color: var(--3b);
+	color: var(--backgroundColour);
+}
+body.darkmode .button4:hover, .button4:active, .button4:focus
+{
+	background-color: var(--4b);
+	color: var(--backgroundColour);
+}
+body.darkmode .button5:hover, .button5:active, .button5:focus
+{
+	background-color: var(--5b);
+	color: var(--backgroundColour);
+}
+body.darkmode .button6:hover, .button6:active, .button6:focus
+{
+	background-color: var(--6b);
+	color: var(--backgroundColour);
+}
+
+/* for level up modals */
+.levelheading
+{
+	font-family: Iceland;
+	line-height: 0.75;
+	font-size: 48px;
+	font-weight: bold;
+	margin-bottom: 0px;
+	text-align: center;
+}
+.levelstats
+{
+	font-family: Righteous;
+	font-size: 20px;
+}
+
+/* dark mode toggle switch */
+.darkmodeswitch:checked
+{
+	background-color: var(--2c);
+	border-color: var(--2c);
+}
+.darkmodeswitch:focus
+{
+	border-color: var(--2c) !important;
+	box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--2a), transparent 25%); !important;
+}
+.darkmodeswitch:not(:checked)
+{
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ae94f2'/%3e%3c/svg%3e") !important;
+}
+
+/* touchscreen toggle switch */
+.touchswitch:checked
+{
+	background-color: var(--3c);
+	border-color: var(--3c);
+}
+.touchswitch:focus
+{
+	border-color: var(--3c) !important;
+	box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--3a), transparent 25%); !important;
+}
+.touchswitch:not(:checked)
+{
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2375eba9'/%3e%3c/svg%3e") !important;
+}
+
+/* buttons under play grid for use on mobile devices */
+.mobilebuttons button
+{
+	font-size: 28px;
+	padding: 0px;
+	height: 44px;
+	color: black;
+	border-width: 3px;
+	border-color: black;
+	margin-left: 5px;
+	margin-right: 5px;
+	touch-action: manipulation;
+}
+.buttonLeft
+{
+	background-color: var(--4b);
+	width: 44px;
+	font-weight: bold;
+}
+.buttonDown
+{
+	background-color: var(--1b);
+	width: 80px;
+}
+.buttonRight
+{
+	background-color: var(--5b);
+	width: 44px;
+	font-weight: bold;
+}
+.buttonBank
+{
+	background-color: var(--2b);
+	width: 80px;
+}
+.mobilebuttons button:active, .mobilebuttons button:hover, .mobilebuttons button:focus
+{
+	background-color: transparent !important;
+}
+.buttonLeft:active, .buttonLeft:hover, .buttonLeft:focus
+{
+	border-color: var(--4c) !important;
+	color: var(--4c) !important;
+}
+.buttonDown:active, .buttonDown:hover, .buttonDown:focus
+{
+	border-color: var(--1c) !important;
+	color: var(--1c) !important;
+}
+.buttonRight:active, .buttonRight:hover, .buttonRight:focus
+{
+	border-color: var(--5c) !important;
+	color: var(--5c) !important;
+}
+.buttonBank:active, .buttonBank:hover, .buttonBank:focus
+{
+	border-color: var(--2c) !important;
+	color: var(--2c) !important;
+}
+
+/* for game over modal */
+.gameovermodal .movetable
+{
+	border: none;
+}
+
+/* for login/signup modals */
+.loginmodal input
+{
+	border: 3px solid var(--3b);
+}
+.loginmodal input:focus
+{
+	border-color: var(--3c) !important;
+	box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--3a), transparent 25%); !important;
+}
+.signupmodal input
+{
+	border: 3px solid var(--1b);
+}
+.signupmodal input:focus
+{
+	border-color: var(--1c) !important;
+	box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--1a), transparent 25%); !important;
+}
+.formheading
+{
+	text-align: left;
+}
+
+/* for leaderboard */
+.leaderboard
+{
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: collapse;
+	min-width: 25%;
+}
+.leaderboard th
+{
+	font-weight: bold;
+	text-align: center;
+}
+.leaderboard td
+{
+	padding: 2px 5px;
+	border: 1px solid var(--fontColour);
+}
+body:not(.darkmode) .leaderboard tr:nth-child(5n+2)
+{
+	background-color: var(--4b);
+}
+body:not(.darkmode) .leaderboard tr:nth-child(5n+3)
+{
+	background-color: var(--1b);
+}
+body:not(.darkmode) .leaderboard tr:nth-child(5n+4)
+{
+	background-color: var(--3b);
+}
+body:not(.darkmode) .leaderboard tr:nth-child(5n)
+{
+	background-color: var(--5b);
+}
+body:not(.darkmode) .leaderboard tr:nth-child(5n+1)
+{
+	background-color: var(--2b);
+}
+body.darkmode .leaderboard tr:nth-child(5n+2)
+{
+	color: var(--4b);
+	border-color: var(--4b);
+}
+body.darkmode .leaderboard tr:nth-child(5n+3)
+{
+	color: var(--1b);
+	border-color: var(--1b);
+}
+body.darkmode .leaderboard tr:nth-child(5n+4)
+{
+	color: var(--3b);
+	border-color: var(--3b);
+}
+body.darkmode .leaderboard tr:nth-child(5n)
+{
+	color: var(--5b);
+	border-color: var(--5b);
+}
+body.darkmode .leaderboard tr:nth-child(5n+1)
+{
+	color: var(--2b);
+	border-color: var(--2b);
+}
+.leaderboard th
+{
+	padding: 2px 5px;
+	background-color: var(--backgroundColour);
+	color: var(--fontColour);
+	text-align: center;
+}
+
+.tile .tooltiptext {
+  display: none;
+  background-color: var(--backgroundColour);
+  color: var(--fontColour);
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  width: 200px;
+  position: absolute;
+  z-index: 1;
+  
+  font-size: 16px;
+  font-family: Lexend;
+  
+  box-shadow: 0px 0px 5px 1px var(--fontColour);
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tile:hover .tooltiptext {
+  display: block;
+}
+
+/* removes sidebar table and moves table on small screens */
+@media(max-width: 767.99px)
+{
+	.col-sm-0
+	{
+		display: none !important;
+	}
+	.tile
+	{
+		border-style: solid;
+	}
+}
