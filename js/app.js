@@ -1008,44 +1008,6 @@ export default {
 				
 				let gameOverScreen = setTimeout(function()
 				{
-					userID.value = sessionStorage.getItem("userid");
-					if(!sentAjax && userID.value != null)
-					{
-						// send game data to be stored in database
-						let data = "gamedata=" + encodeURIComponent(JSON.stringify({
-							"userID": userID.value,
-							"totalScore": totalScore.value,
-							"bestWord": bestMoves.value[0][0],
-							"bestWordScore": bestMoves.value[0][1],
-							"bestWordGem": bestMoves.value[0][2],
-							"numLetters": totalLettersDropped.value,
-							"numWords": totalWordsMade.value
-						}));
-
-						var xhr = new XMLHttpRequest();
-
-						xhr.open("POST", "savedata.php", true);
-
-						xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-						xhr.onreadystatechange = function()
-						{
-							if(xhr.readyState === XMLHttpRequest.DONE)
-							{
-								if(xhr.status === 200)
-								{
-									console.log(xhr.responseText);
-								}
-								else
-								{
-									console.error("Error:", xhr.status);
-								}
-							}
-						};
-						xhr.send(data);
-						sentAjax = true;
-					}
-					
 					let modal = new bootstrap.Modal(document.getElementById("gameOverModal"));
 					modal.show();
 				}, 1000);
@@ -1393,111 +1355,6 @@ export default {
 			let modal = new bootstrap.Modal(document.getElementById("signupModal"));
 			modal.show();
 		}
-		function login()
-		{
-			let username = document.getElementById("username").value;
-			let pwd = document.getElementById("password").value;
-			// send game data to be stored in database
-			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
-				"username": username,
-				"password": pwd,
-				"totalScore": totalScore.value,
-				"bestWord": bestMoves.value[0][0],
-				"bestWordScore": bestMoves.value[0][1],
-				"bestWordGem": bestMoves.value[0][2],
-				"numLetters": totalLettersDropped.value,
-				"numWords": totalWordsMade.value
-			}));
-
-			var xhr = new XMLHttpRequest();
-
-			xhr.open("POST", "savedata.php", true);
-
-			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-			xhr.onreadystatechange = function()
-			{
-				if(xhr.readyState === XMLHttpRequest.DONE)
-				{
-					if(xhr.status === 200)
-					{
-						if(xhr.responseText.includes("login error"))
-						{
-							loginError.value = 1;
-						}
-						else if(xhr.responseText.includes("userid "))
-						{
-							loginError.value = 0;
-							let userid = xhr.responseText.split(" ")[1];
-							sessionStorage.setItem("userid", userid);
-							window.location.href = "leaderboard.php";
-						}
-						else
-						{
-							console.log(xhr.responseText);
-						}
-					}
-					else
-					{
-						console.error("Error:", xhr.status);
-					}
-				}
-			};
-			xhr.send(data);
-		}
-		function signup()
-		{
-			let username = document.getElementById("username_signup").value;
-			let pwd = document.getElementById("password_signup").value;
-			// send game data to be stored in database
-			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
-				"signup": true,
-				"username": username,
-				"password": pwd,
-				"totalScore": totalScore.value,
-				"bestWord": bestMoves.value[0][0],
-				"bestWordScore": bestMoves.value[0][1],
-				"bestWordGem": bestMoves.value[0][2],
-				"numLetters": totalLettersDropped.value,
-				"numWords": totalWordsMade.value
-			}));
-
-			var xhr = new XMLHttpRequest();
-
-			xhr.open("POST", "savedata.php", true);
-
-			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-			xhr.onreadystatechange = function()
-			{
-				if(xhr.readyState === XMLHttpRequest.DONE)
-				{
-					if(xhr.status === 200)
-					{
-						if(xhr.responseText.includes("username taken"))
-						{
-							loginError.value = 2;
-						}
-						else if(xhr.responseText.includes("userid "))
-						{
-							loginError.value = 0;
-							let userid = xhr.responseText.split(" ")[1];
-							sessionStorage.setItem("userid", userid);
-							window.location.href = "leaderboard.php";
-						}
-						else
-						{
-							console.log(xhr.responseText);
-						}
-					}
-					else
-					{
-						console.error("Error:", xhr.status);
-					}
-				}
-			};
-			xhr.send(data);
-		}
 		
 		return { grid, nextBlock, bankedTile, gemTitles, totalScore, totalLettersDropped, totalWordsMade, lastMoveScore, lastMoveGem, prevMoves, bestMoves, bestMoveLevel, longestWordLevel, maxStatLength, gameOver, bonusWord, level, paused, tileVariantUnlocks, gameStarted, handleKeyDown, userID, openLoginModal, login, openSignupModal, signup, loginError, isFlipping, turnsCloaked, probabilityChangeUnlocks, levelThresholds };
 	},
@@ -1756,7 +1613,7 @@ export default {
 						<div class="modal-footer">
 							<span v-if="userID == null">
 								<button type="button" class="btn btn-secondary button3" data-bs-dismiss="modal" @click="openLoginModal()">Log In to Save Results</button>
-								<a class="ms-3" href="index.php"><button type="button" class="btn btn-secondary button2">Home</button></a>
+								<a class="ms-3" href="play.php"><button type="button" class="btn btn-secondary button2">Play Again</button></a>
 							</span>
 							<a v-else href="leaderboard.php"><button type="button" class="btn btn-secondary button3">Continue</button></a>
 						</div>
@@ -1774,11 +1631,11 @@ export default {
 							<p class="formheading subheading">Password</p>
 							<input class="form-control score3" type="password" name="password" id="password" /><br />
 							<p class="formheading" v-if="loginError === 1">Login information is incorrect; please try again!</p>
-							<button class="btn btn-secondary button3" type="submit" @click="login()">Log In</button>
+							<button class="btn btn-secondary button3" type="submit">Log In</button>
 						</div>
 						<div class="modal-footer">
 							<p style="text-align: right">Don't have an account? <a class="signuplink score1" href="#" data-bs-dismiss="modal" @click="openSignupModal()">Click here to sign up!</a><br />No email address required.</p>
-							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
+							<p>Or, <a class="loginlink score4" href="play.php">click here to play again.</a></p>
 						</div>
 					</div>
 				</div>
@@ -1794,11 +1651,11 @@ export default {
 							<input class="form-control score1" type="text" name="username" id="username_signup" /><br />
 							<p class="formheading subheading">Password</p>
 							<input class="form-control score1" type="password" name="password" id="password_signup" /><br />
-							<button class="btn btn-secondary button1" type="submit" @click="signup()">Sign Up</button>
+							<button class="btn btn-secondary button1" type="submit">Sign Up</button>
 						</div>
 						<div class="modal-footer">
 							<p>Already have an account? <a class="loginlink score3" href="#" data-bs-dismiss="modal" @click="openLoginModal()">Click here to log in!</a></p>
-							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
+							<p>Or, <a class="loginlink score4" href="play.php">click here to play again.</a></p>
 						</div>
 					</div>
 				</div>
