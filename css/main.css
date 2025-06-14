@@ -288,11 +288,20 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
 .emptytile
 {
 	border: 3px solid transparent;
-	border-radius: 5px;
+	border-radius: 0px;
 	width: 50px;
 	height: 50px;
 	background-color: transparent;
 }
+.gridlines.darkmode .box .emptytile
+{
+	border-color: #555;
+}
+.gridlines:not(.darkmode) .box .emptytile
+{
+	border-color: #eee;
+}
+
 /* ensures tiles are square */
 .fixed-height
 {
@@ -480,7 +489,7 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
 	
 	border-color: #96532a;
 }
-.tileF
+.tileR
 {
   --s: 30px; /* control the size*/
   --c1: #e0ffbf;
@@ -491,6 +500,47 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
     conic-gradient(from 45deg,var(--c1) 25%,var(--c2) 0);
   background-size: var(--s) var(--s);
   border-color: #75b037;
+}
+/*.tileF {
+  --s: 30px;
+  --c1: #faafaf;
+  --c2: #ed8282;
+  
+  --g:,var(--c1) 25%,#0000 0;
+  background:
+    conic-gradient(from  45deg at 75% 75%var(--g)),
+    conic-gradient(from 135deg at 25% 75%var(--g)),
+    conic-gradient(from -45deg at 75% 25%var(--g)),
+    conic-gradient(from 225deg at 25% 25%var(--g)),
+    repeating-conic-gradient(from -45deg,var(--c1) 0 45deg,var(--c2) 0 50%);
+  background-size: var(--s) var(--s);
+  border-color: #b04a4a;
+}*/
+.tileF
+{
+  --s: 30px; /* control the size*/
+  --c1: #faafaf;
+  --c2: #ed8282;
+  
+  background:
+    conic-gradient(#0000 75%,var(--c1) 0) calc(var(--s)/4) calc(var(--s)*.5),
+    conic-gradient(from -45deg,var(--c1) 25%,var(--c2) 0);
+  background-size: var(--s) var(--s);
+  border-color: #b04a4a;
+}
+.tileT {
+  --s: 23px; /* control the size*/
+  --c1: #c0bfff;
+  --c2: #9c9bf2;
+  
+  background:
+    conic-gradient(from 45deg at 75% 75%,var(--c1) 25%,var(--c2) 0 50%,#0000 0)
+     0 0/var(--s) var(--s),
+    conic-gradient(from 225deg at 25% 25%,var(--c2) 25%,var(--c1) 0 50%,#0000 0)
+     0 0/var(--s) var(--s),
+    repeating-conic-gradient(var(--c2) 0 25%,var(--c1) 0 50%)
+     0 0/calc(2*var(--s)) calc(2*var(--s));
+	border-color: #403ea8;
 }
 .tileC
 {
@@ -521,9 +571,40 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
 	color: white;
 	border-color: #141414;
 }
-.tileU p
+.tileB p
 {
 	transform: rotateY(180deg);
+}
+.tileU p
+{
+	transform: rotate(180deg);
+	text-decoration: underline;
+}
+.tileI
+{
+  --s: 22px; /* control the size*/
+  --c1: #e6fffb;
+  --c2: #b9faef;
+    
+  --_l:#0000 34%,var(--c1) 0 41%,#0000 0 59%,var(--c1) 0 66%,#0000 0;
+  background:
+    linear-gradient(-45deg,var(--_l)),
+    linear-gradient( 45deg,var(--_l)) var(--c2);
+  background-size: var(--s) var(--s);
+  border-color: #3fc4ae;
+}
+.tileS
+{
+  --s: 30px; /* control the size*/
+  --c1: #f3c4ff;
+  --c2: #fffbad;
+  
+  --_g: var(--c1) 0 25%,#0000 0 50%;
+  background:
+   repeating-conic-gradient(at 33% 33%,var(--_g)),
+   repeating-conic-gradient(at 66% 66%,var(--_g)),
+   var(--c2); 
+  background-size: var(--s) var(--s); 
 }
 
 /*
@@ -558,11 +639,26 @@ blue/purple tests:
 {
 	margin: -10px 5px 0px 0px;
 }
-/* for when tiles get upgraded */
-.gemspin, .gridflip
+/* for when grid gets mirrored */
+.gemspin, .gridmirror
 {
 	transition: 0.5s;
 	transform: rotateY(360deg);
+}
+/* for when grid gets flipped */
+.gridflip
+{
+	transition: 0.5s;
+	transform: rotateX(360deg);
+}
+.gridflip.gridmirror
+{
+	transform: rotateX(360deg) rotateY(360deg);
+}
+.gridtranspose
+{
+	transition: 0.5s;
+	transform: rotateX(360deg) rotateY(360deg);
 }
 /* warp tile animation */
 .warpspin p
@@ -743,6 +839,10 @@ body.darkmode .score6
 {
 	color: var(--6b);
 }
+.score0
+{
+    color: var(--fontColour);
+}
 
 /* for coloured buttons - depends on whether light/dark mode is activated */
 body:not(.darkmode) .button1, body:not(.darkmode) .button2, body:not(.darkmode) .button3, body:not(.darkmode) .button4, body:not(.darkmode) .button5, body:not(.darkmode) .button6
@@ -908,6 +1008,22 @@ body.darkmode .button6:hover, .button6:active, .button6:focus
 .touchswitch:not(:checked)
 {
 	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2375eba9'/%3e%3c/svg%3e") !important;
+}
+
+/* gridlines toggle switch */
+.gridlineswitch:checked
+{
+	background-color: var(--1c);
+	border-color: var(--1c);
+}
+.gridlineswitch:focus
+{
+	border-color: var(--1c) !important;
+	box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--1a), transparent 25%); !important;
+}
+.gridlineswitch:not(:checked)
+{
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffd36b'/%3e%3c/svg%3e") !important;
 }
 
 /* buttons under play grid for use on mobile devices */
