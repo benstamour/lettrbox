@@ -82,6 +82,7 @@ function setTheme(change = false)
 	}
 }
 
+// MOBILE BUTTONS
 var touchscreen = 1;
 if(sessionStorage.getItem("touchscreen") != null)
 {
@@ -131,6 +132,59 @@ function setTouchscreen(change = false)
 	}
 }
 
+// GRIDLINES
+var gridlines = 0;
+if(sessionStorage.getItem("gridlines") != null)
+{
+	gridlines = sessionStorage.getItem("gridlines");
+}
+function setGridlines(change = false)
+{
+	if(change)
+	{
+		if(document.getElementById("gridlineswitch").checked)
+		{
+			gridlines = 1;
+		}
+		else
+		{
+			gridlines = 0;
+		}
+	}
+	else
+	{
+		if(sessionStorage.getItem("gridlines") != null)
+		{
+			gridlines = sessionStorage.getItem("gridlines");
+		}
+	}
+	if(gridlines == 1)
+	{
+		document.getElementById("gridlineswitch").checked = true;
+	}
+	else
+	{
+		document.getElementById("gridlineswitch").checked = false;
+	}
+	sessionStorage.setItem("gridlines", gridlines);
+	
+	if(gridlines == 1)
+	{
+		document.body.classList.add("gridlines");
+	}
+	else
+	{
+		document.body.classList.remove("gridlines");
+	}
+}
+
+function applySettings()
+{
+	setTheme();
+	setTouchscreen();
+	setGridlines();
+}
+
 
 // LOADER
 
@@ -163,4 +217,100 @@ function openSignupModal()
 	loginError = 0;
 	let modal = new bootstrap.Modal(document.getElementById("signupModal"));
 	modal.show();
+}
+function login()
+{
+	let username = document.getElementById("username").value;
+	let pwd = document.getElementById("password").value;
+	// send game data to be stored in database
+	let data = "gamedata=" + encodeURIComponent(JSON.stringify({
+		"username": username,
+		"password": pwd
+	}));
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.open("POST", "savedata.php", true);
+
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState === XMLHttpRequest.DONE)
+		{
+			if(xhr.status === 200)
+			{
+				if(xhr.responseText === "login error")
+				{
+					loginError = 1;
+					document.getElementById("loginerror").style.display = "block";
+				}
+				else if(xhr.responseText.includes("userid "))
+				{
+					loginError = 0;
+					let userid = xhr.responseText.split(" ")[1];
+					sessionStorage.setItem("userid", userid);
+					window.location.reload();
+				}
+				else
+				{
+					console.log(xhr.responseText);
+				}
+			}
+			else
+			{
+				console.error("Error:", xhr.status);
+			}
+		}
+	};
+	xhr.send(data);
+}
+function signup()
+{
+	let username = document.getElementById("username_signup").value;
+	let pwd = document.getElementById("password_signup").value;
+	// send game data to be stored in database
+	let data = "gamedata=" + encodeURIComponent(JSON.stringify({
+		"signup": true,
+		"username": username,
+		"password": pwd
+	}));
+
+	var xhr = new XMLHttpRequest();
+
+	xhr.open("POST", "savedata.php", true);
+
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState === XMLHttpRequest.DONE)
+		{
+			if(xhr.status === 200)
+			{
+				if(xhr.responseText === "username taken")
+				{
+					loginError.value = 2;
+					document.getElementById("signuperror").style.display = "block";
+				}
+				else if(xhr.responseText.includes("userid "))
+				{
+					loginError.value = false;
+					let userid = xhr.responseText.split(" ")[1];
+					sessionStorage.setItem("userid", userid);
+					console.log(sessionStorage.getItem("userid"));
+					window.location.reload();
+				}
+				else
+				{
+					console.log(xhr.responseText);
+				}
+			}
+			else
+			{
+				console.error("Error:", xhr.status);
+			}
+		}
+	};
+	xhr.send(data);
 }
