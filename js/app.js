@@ -35,7 +35,10 @@ export default {
 		var paused = ref(true);
 		var comboMultiplier = 1;
 		var lastFoundWords = false;
-		var isFlipping = ref(true);
+		var isMirroring = ref(false);
+		var isFlipping = ref(false);
+		var isTransposing = ref(false);
+		var isScrambling = ref(false);
 		var turnsCloaked = ref(0);
 		var halvedLetter = "";
 		
@@ -54,7 +57,7 @@ export default {
 		fetch('wordlists/wordlist4_selection.txt')
 			.then(response => response.text())
 			.then((data) => {
-				bonusWordSelection = data.toUpperCase().split("\n");
+				bonusWordSelection = data.toUpperCase().split("\r\n");
 			})
 			.then(() => {
 				//bonusWord.value = bonusWordSelection[Math.floor(Math.random()*bonusWordSelection.length)];
@@ -73,15 +76,17 @@ export default {
 		//grid.value[5][5] = "W6";
 		//grid.value[0][0] = "D0";
 		//grid.value[1][0] = "O0";
-		//grid.value[2][0] = "N0";
+		//grid.value[2][0] = "N0 F";
 		//grid.value[3][0] = "K0 V";
 		//grid.value[4][0] = "E0 U";
 		//grid.value[0][5] = "P0 P";
 		//grid.value[1][5] = "H0 W";
-		//grid.value[2][5] = "O0 F";
+		//grid.value[2][5] = "O0 R";
 		//grid.value[3][5] = "N0 C";
 		//grid.value[4][5] = "E7";
 		//grid.value[4][2] = "C0";
+		//grid.value[2][2] = "I0 I";
+		//grid.value[1][2] = "J0";
 		//grid.value[4][3] = "A0";
 		//grid.value[4][4] = "T5";
 		//grid.value[4][1] = "R0";
@@ -161,11 +166,11 @@ export default {
 			levelThresholds.push(i);
 		}
 		
-		// probability of basic tile, petrified tile, mystery tile
-		var tileVariantWeights = [100, 0, 0, 0, 0, 0, 0, 0];
-		const variants = [' ', 'P', 'M', 'W', 'F', 'C', 'V', 'U'];
-		const tileVariantUnlocks = [0, 5, 8, 11, 20, 17, 14, 32]; // levels at which tile variants are unlocked
-		const probabilityChangeUnlocks = [23, 26, 29]; // levels at which tile probabilities change: double, halve, remove
+		// probability of basic tile, petrified tile, mystery tile, etc.
+		var tileVariantWeights = [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		const variants = [' ', 'P', 'M', 'W', 'R', 'C', 'V', 'B', 'F', 'T', 'I', 'U'];
+		const tileVariantUnlocks = [0, 5, 8, 11, 20, 17, 14, 41, 26, 38, 32, 44]; // levels at which tile variants are unlocked
+		const probabilityChangeUnlocks = [23, 29, 35]; // levels at which tile probabilities change: double, halve, remove
 		
 		Array.prototype.randomize = function()
 		{
@@ -292,7 +297,7 @@ export default {
 			}
 			else if(level.value === tileVariantUnlocks[4])
 			{
-				// unlock flip tiles
+				// unlock mirror tiles
 				tileVariantWeights[4] = 5;
 			}
 			else if(level.value === tileVariantUnlocks[5])
@@ -308,7 +313,30 @@ export default {
 			else if(level.value === tileVariantUnlocks[7])
 			{
 				// unlock backwards tiles
-				tileVariantWeights[7] = 5;
+				tileVariantWeights[7] = 3;
+			}
+			else if(level.value === tileVariantUnlocks[8])
+			{
+				// unlock flip tiles
+				tileVariantWeights[4] = 4;
+				tileVariantWeights[8] = 4;
+			}
+			else if(level.value === tileVariantUnlocks[9])
+			{
+				// unlock transpose tiles
+				tileVariantWeights[4] = 3;
+				tileVariantWeights[8] = 3;
+				tileVariantWeights[9] = 3;
+			}
+			else if(level.value === tileVariantUnlocks[10])
+			{
+				// unlock frozen tiles
+				tileVariantWeights[10] = 5;
+			}
+			else if(level.value === tileVariantUnlocks[11])
+			{
+				// unlock upside-down tiles
+				tileVariantWeights[11] = 3;
 			}
 			else if(probabilityChangeUnlocks.includes(level.value))
 			{
@@ -566,8 +594,11 @@ export default {
 			let bestWord = ["",0];
 			let longestWord = ["",0];
 			//let numFlips = 0;
+			let mirrorCoords = [];
 			let flipCoords = [];
+			let transposeCoords = [];
 			let cloakCoords = [];
+			let shouldScramble = false;
 			
 			// identify found words and add glow class
 			for(let i = 0; i < horizontalWords.length; i++)
@@ -602,6 +633,12 @@ export default {
 						}
 					}
 					
+					// for mirror tiles
+					if(tileval.length >= 4 && tileval[3] === 'R' && !mirrorCoords.includes(i + ',' + j))
+					{
+						mirrorCoords.push(i + ',' + j);
+					}
+					
 					// for flip tiles
 					if(tileval.length >= 4 && tileval[3] === 'F' && !flipCoords.includes(i + ',' + j))
 					{
@@ -609,10 +646,22 @@ export default {
 						flipCoords.push(i + ',' + j);
 					}
 					
+					// for transpose tiles
+					if(tileval.length >= 4 && tileval[3] === 'T' && !transposeCoords.includes(i + ',' + j))
+					{
+						transposeCoords.push(i + ',' + j);
+					}
+					
 					// for cloak tiles
 					if(tileval.length >= 4 && tileval[3] === 'C' && !cloakCoords.includes(i + ',' + j))
 					{
 						cloakCoords.push(i + ',' + j);
+					}
+					
+					// for scramble tiles
+					if(tileval.length >= 4 && tileval[3] === 'S' && !shouldScramble)
+					{
+						shouldScramble = true;
 					}
 					
 					// for void tiles
@@ -631,9 +680,9 @@ export default {
 					multiplier *= 1.5;
 				}
 				
-				console.log(horizontalWords[i] + ' ' + multiplier);
+				//console.log(horizontalWords[i] + ' ' + multiplier);
 				let score = calculateScore(horizontalWords[i], multiplier);
-				console.log(score);
+				//console.log(score);
 				
 				//console.log(horizontalWords[i] + ": " + score);
 				moveScore += score;
@@ -692,12 +741,31 @@ export default {
 						}
 					}
 					
+					// for mirror tiles
+					if(tileval.length >= 4 && tileval[3] === 'R' && !mirrorCoords.includes(i + ',' + j))
+					{
+						mirrorCoords.push(i + ',' + j);
+					}
+					
 					// for flip tiles
 					if(tileval.length >= 4 && tileval[3] === 'F' && !flipCoords.includes(i + ',' + j))
 					{
 						//numFlips++;
 						flipCoords.push(i + ',' + j);
 					}
+					
+					// for transpose tiles
+					if(tileval.length >= 4 && tileval[3] === 'T' && !transposeCoords.includes(i + ',' + j))
+					{
+						transposeCoords.push(i + ',' + j);
+					}
+					
+					// for scramble tiles
+					if(tileval.length >= 4 && tileval[3] === 'S' && !shouldScramble)
+					{
+						shouldScramble = true;
+					}
+					
 					// for cloak tiles
 					if(tileval.length >= 4 && tileval[3] === 'C' && !cloakCoords.includes(i + ',' + j))
 					{
@@ -720,9 +788,9 @@ export default {
 					multiplier *= 1.5;
 				}
 				
-				console.log(verticalWords[i] + ' ' + multiplier);
+				//console.log(verticalWords[i] + ' ' + multiplier);
 				let score = calculateScore(verticalWords[i], multiplier);
-				console.log(score);
+				//console.log(score);
 				
 				moveScore += score;
 				
@@ -785,23 +853,20 @@ export default {
 				}
 			}
 			
-			console.log("Score Bonus Tile: " + scoreBonusTile);
-			console.log("Length Bonus Tile: " + lengthBonusTile);
+			//console.log("Score Bonus Tile: " + scoreBonusTile);
+			//console.log("Length Bonus Tile: " + lengthBonusTile);
 			let upgradeTileType = 0;
 			let upgrading = true;
 			if(scoreBonusTile > 0 && lengthBonusTile > 0)
 			{
-				console.log("A");
 				if(Math.random() < 0.5)
 				{
-					console.log("B");
 					nextTileType = Math.max(nextTileType, scoreBonusTile);
 					upgradeTileType = lengthBonusTile;
 					//upgradeRandomGridTile(lengthBonusTile);
 				}
 				else
 				{
-					console.log("C");
 					nextTileType = Math.max(nextTileType, lengthBonusTile);
 					upgradeTileType = scoreBonusTile;
 					//upgradeRandomGridTile(scoreBonusTile);
@@ -809,30 +874,25 @@ export default {
 			}
 			else if(scoreBonusTile > 0 || lengthBonusTile > 0)
 			{
-				console.log("D");
 				let bonusTile = Math.max(scoreBonusTile, lengthBonusTile);
 				if(nextTileType === 0 && Math.random() < 0.5)
 				{
-					console.log("E");
 					nextTileType = bonusTile;
 					upgrading = false;
 				}
 				else
 				{
-					console.log("F");
 					upgradeTileType = bonusTile;
 					//upgradeRandomGridTile(bonusTile);
 				}
 			}
 			else if(Math.random() < 0.05)
 			{
-				console.log("G");
 				nextTileType = 1;
 				upgrading = false;
 			}
 			else
 			{
-				console.log("H");
 				upgrading = false;
 			}
 			
@@ -893,12 +953,12 @@ export default {
 					}
 				}
 				
-				// flip board if flip tile played
-				if(flipCoords.length % 2 === 1)
+				// mirror board if mirror tile played
+				if(mirrorCoords.length % 2 === 1)
 				{
-					let flip = setTimeout(function()
+					let mirror = setTimeout(function()
 					{
-						isFlipping.value = true;
+						isMirroring.value = true;
 						let swap = setTimeout(function()
 						{
 							for(let i = 0; i < height; i++)
@@ -910,14 +970,100 @@ export default {
 									grid.value[i][width-j-1] = temp;
 								}
 							}
+							isMirroring.value = false;
+						}, 250);
+					}, 750);
+				}
+				// flip board if flip tile played
+				if(flipCoords.length % 2 === 1)
+				{
+					let flip = setTimeout(function()
+					{
+						isFlipping.value = true;
+						let swap = setTimeout(function()
+						{
+							for(let j = 0; j < width; j++)
+							{
+								for(let i = 0; i < Math.floor(height/2); i++)
+								{
+									let temp = grid.value[i][j];
+									grid.value[i][j] = grid.value[height-i-1][j];
+									grid.value[height-i-1][j] = temp;
+								}
+							}
 							isFlipping.value = false;
 						}, 250);
 					}, 750);
 				}
+				// transpose board if transpose tile played
+				if(transposeCoords.length % 2 === 1)
+				{
+					let transpose = setTimeout(function()
+					{
+						isTransposing.value = true;
+						let swap = setTimeout(function()
+						{
+							for(let i = 0; i < height; i++)
+							{
+								for(let j = i+1; j < width; j++)
+								{
+									let temp = grid.value[i][j];
+									grid.value[i][j] = grid.value[j][i];
+									grid.value[j][i] = temp;
+								}
+							}
+							isTransposing.value = false;
+						}, 250);
+					}, 750);
+				}
+				// cloak board if cloak tiles played
 				let cloak = setTimeout(function()
 				{
 					turnsCloaked.value += cloakCoords.length;
 				}, 500);
+				// scramble tiles if scramble tiles played
+				/*if(shouldScramble)
+				{
+					let setscramble = setTimeout(function()
+					{
+						isScrambling.value = true;
+						let scramble = setTimeout(function()
+						{
+							let curTiles = [];
+							for(let i = 0; i < height; i++)
+							{
+								for(let j = 0; j < width; j++)
+								{
+									if(grid.value[i][j] !== "")
+									{
+										curTiles.push(grid.value[i][j]);
+										grid.value[i][j] = "";
+									}
+								}
+							}
+							let columns = [];
+							for(let j = 0; j < width; j++)
+							{
+								columns.push([j, height-1]);
+							}
+							for(let i = 0; i < curTiles.length; i++)
+							{
+								let index = Math.floor(Math.random()*curTiles.length);
+								let tile = curTiles[index];
+								let colIndex = Math.floor(Math.random()*columns.length);
+								
+								grid.value[columns[colIndex][1]][columns[colIndex][0]] = tile;
+								columns[colIndex][1]--;
+								if(columns[colIndex][1] < 0)
+								{
+									columns.splice(colIndex, 1);
+								}
+								curTiles.splice(index, 1);
+							}
+							isScrambling.value = false;
+						}, 250);
+					}, 750);
+				}*/
 				
 				// if more words are found immediately after this check, it creates a combo for bonus points
 				comboMultiplier += 0.25;
@@ -993,7 +1139,7 @@ export default {
 				lastFoundWords = false;
 				
 				// checks if there are still gaps in the board
-				for(let i = 0; i < height; i++)
+				/*for(let i = 0; i < height; i++)
 				{
 					for(let j = 0; j < width; j++)
 					{
@@ -1002,12 +1148,58 @@ export default {
 							return;
 						}
 					}
+				}*/
+				for(let j = 0; j < width; j++)
+				{
+					if(grid.value[0][j] === "")
+					{
+						return;
+					}
 				}
+				
 				// if the program reaches this, the board is full and no more moves can be made
 				gameOver.value = true;
 				
 				let gameOverScreen = setTimeout(function()
 				{
+					userID.value = sessionStorage.getItem("userid");
+					if(!sentAjax && userID.value != null)
+					{
+						// send game data to be stored in database
+						let data = "gamedata=" + encodeURIComponent(JSON.stringify({
+							"userID": userID.value,
+							"totalScore": totalScore.value,
+							"bestWord": bestMoves.value[0][0],
+							"bestWordScore": bestMoves.value[0][1],
+							"bestWordGem": bestMoves.value[0][2],
+							"numLetters": totalLettersDropped.value,
+							"numWords": totalWordsMade.value
+						}));
+
+						var xhr = new XMLHttpRequest();
+
+						xhr.open("POST", "savedata.php", true);
+
+						xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+						xhr.onreadystatechange = function()
+						{
+							if(xhr.readyState === XMLHttpRequest.DONE)
+							{
+								if(xhr.status === 200)
+								{
+									console.log(xhr.responseText);
+								}
+								else
+								{
+									console.error("Error:", xhr.status);
+								}
+							}
+						};
+						xhr.send(data);
+						sentAjax = true;
+					}
+					
 					let modal = new bootstrap.Modal(document.getElementById("gameOverModal"));
 					modal.show();
 				}, 1000);
@@ -1027,7 +1219,7 @@ export default {
 				for(let j = 0; j < cols.length; j++)
 				{
 					let tileval = grid.value[rows[i]][cols[j]];
-					if(tileval !== "" && tileval[1] === '0' && (tileval.length < 4 || !['P', 'W', 'F', 'C', 'V'].includes(tileval[3])))
+					if(tileval !== "" && tileval[1] === '0' && (tileval.length < 4 || !['P', 'W', 'R', 'C', 'V', 'F', 'I', 'T', 'S'].includes(tileval[3])))
 					{
 						foundUpgrade = true;
 						grid.value[rows[i]][cols[j]] = tileval.substring(0,1) + '~' + tileval.substring(2);
@@ -1079,7 +1271,11 @@ export default {
 					for(let i = height-1; i >= 0; i--)
 					{
 						let tileval = grid.value[i][j];
-						if(tileval !== "")
+						if(tileval.length >= 4 && tileval[3] === 'I')
+						{
+							lowestBlank = i-1;
+						}
+						else if(tileval !== "")
 						{
 							grid.value[i][j] = "";
 							grid.value[lowestBlank][j] = tileval;
@@ -1208,7 +1404,7 @@ export default {
 					//console.log("highest row = " + highestRow);
 					if(highestRow < 0)
 					{
-						console.log("game over");
+						//console.log("game over");
 					}
 					else
 					{
@@ -1336,11 +1532,15 @@ export default {
 			'7': "Prismatic Tile: 2x multiplier",
 			'P': "Petrified Tile: Can only be used in words with at least 4 letters",
 			'W': "Warp Tile: Randomizes its letter each turn a word is not made",
-			'F': "Flip Tile: Flips the gameboard when used in a word",
+			'R': "Mirror Tile: Mirrors the gameboard when used in a word",
 			'C': "Cloak Tile: Hides the gameboard for a turn when used in a word",
 			'V': "Void Tile: 0.5x multiplier",
-			'U': "Backwards Tile: No effect; just weird-looking :)",
+			'B': "Backwards Tile: No effect; just weird-looking :)",
+			'U': "Upside-Down Tile: No effect; just weird-looking :)",
 			'M': "Mystery Tile: The letter will be revealed once you drop it into the grid!",
+			'F': "Flip Tile: Flips the gameboard when used in a word",
+			'T': "Transpose Tile: Transposes the grid so that rows become columns and vice versa",
+			'I': "Frozen Tile: Tile will not move once dropped into the gameboard, even if the tiles below it are removed",
 		};
 		
 		function openLoginModal()
@@ -1355,8 +1555,113 @@ export default {
 			let modal = new bootstrap.Modal(document.getElementById("signupModal"));
 			modal.show();
 		}
+		function login()
+		{
+			let username = document.getElementById("username").value;
+			let pwd = document.getElementById("password").value;
+			// send game data to be stored in database
+			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
+				"username": username,
+				"password": pwd,
+				"totalScore": totalScore.value,
+				"bestWord": bestMoves.value[0][0],
+				"bestWordScore": bestMoves.value[0][1],
+				"bestWordGem": bestMoves.value[0][2],
+				"numLetters": totalLettersDropped.value,
+				"numWords": totalWordsMade.value
+			}));
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open("POST", "savedata.php", true);
+
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === XMLHttpRequest.DONE)
+				{
+					if(xhr.status === 200)
+					{
+						if(xhr.responseText.includes("login error"))
+						{
+							loginError.value = 1;
+						}
+						else if(xhr.responseText.includes("userid "))
+						{
+							loginError.value = 0;
+							let userid = xhr.responseText.split(" ")[1];
+							sessionStorage.setItem("userid", userid);
+							window.location.href = "leaderboard.php";
+						}
+						else
+						{
+							console.log(xhr.responseText);
+						}
+					}
+					else
+					{
+						console.error("Error:", xhr.status);
+					}
+				}
+			};
+			xhr.send(data);
+		}
+		function signup()
+		{
+			let username = document.getElementById("username_signup").value;
+			let pwd = document.getElementById("password_signup").value;
+			// send game data to be stored in database
+			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
+				"signup": true,
+				"username": username,
+				"password": pwd,
+				"totalScore": totalScore.value,
+				"bestWord": bestMoves.value[0][0],
+				"bestWordScore": bestMoves.value[0][1],
+				"bestWordGem": bestMoves.value[0][2],
+				"numLetters": totalLettersDropped.value,
+				"numWords": totalWordsMade.value
+			}));
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open("POST", "savedata.php", true);
+
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === XMLHttpRequest.DONE)
+				{
+					if(xhr.status === 200)
+					{
+						if(xhr.responseText.includes("username taken"))
+						{
+							loginError.value = 2;
+						}
+						else if(xhr.responseText.includes("userid "))
+						{
+							loginError.value = 0;
+							let userid = xhr.responseText.split(" ")[1];
+							sessionStorage.setItem("userid", userid);
+							window.location.href = "leaderboard.php";
+						}
+						else
+						{
+							console.log(xhr.responseText);
+						}
+					}
+					else
+					{
+						console.error("Error:", xhr.status);
+					}
+				}
+			};
+			xhr.send(data);
+		}
 		
-		return { grid, nextBlock, bankedTile, gemTitles, totalScore, totalLettersDropped, totalWordsMade, lastMoveScore, lastMoveGem, prevMoves, bestMoves, bestMoveLevel, longestWordLevel, maxStatLength, gameOver, bonusWord, level, paused, tileVariantUnlocks, gameStarted, handleKeyDown, userID, openLoginModal, login, openSignupModal, signup, loginError, isFlipping, turnsCloaked, probabilityChangeUnlocks, levelThresholds };
+		return { grid, nextBlock, bankedTile, gemTitles, totalScore, totalLettersDropped, totalWordsMade, lastMoveScore, lastMoveGem, prevMoves, bestMoves, bestMoveLevel, longestWordLevel, maxStatLength, gameOver, bonusWord, level, paused, tileVariantUnlocks, gameStarted, handleKeyDown, userID, openLoginModal, login, openSignupModal, signup, loginError, isMirroring, isFlipping, isTransposing, turnsCloaked, probabilityChangeUnlocks, levelThresholds };
 	},
 	/*watch:
 	{
@@ -1372,8 +1677,7 @@ export default {
 		//const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
 		//const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 		
-		setTheme();
-		setTouchscreen();
+		applySettings();
 		let startmodal = new bootstrap.Modal(document.getElementById("infoModalStart"));
 		startmodal.show();
 	},
@@ -1387,7 +1691,7 @@ export default {
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="paused = false"></button>
 						</div>
 						<div class="modal-body">
-							<p>Drop letter tiles into the grid to spell words! Each time a word is formed, the tiles in the word will be removed from the grid. The game ends when the grid is completely filled!</p>
+							<p>Drop letter tiles into the grid to spell words! Each time a word with at least three letters is formed, the tiles in the word will be removed from the grid. The game ends when the grid is completely filled!</p>
 							<p>Use the <b>left and right arrow keys</b> to decide where the next tile falls, and press the <b>down arrow key</b> or <b>enter key</b> to drop the tile immediately.</p>
 							<p>You can also use the <b>up arrow key</b> to bank a tile for later - if you already have a tile in the bank, you will be swapping your current tile for the banked one.</p>
 							<p>If you create high-scoring words, you may encounter some <b>special tiles</b> that provide a score bonus when played! The list of special tiles is given below.</p>
@@ -1528,12 +1832,12 @@ export default {
 							</div>
 							<div v-else-if="level === tileVariantUnlocks[4]">
 								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
-								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">flip tiles</span>!</b></p>
-								<div class="tile tileF" style="margin-left: auto; margin-right: auto">
-									<div class="fixed-height"><p>F</p></div>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">mirror tiles</span>!</b></p>
+								<div class="tile tileR" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>M</p></div>
 								</div>
-								<p><b>Each time one of these tiles is removed from the board, the board will flip, so all tiles on the left will be swapped to the right and vice versa.</b></p>
-								<p><b>(You can counter this effect by playing an even number of tiles at once!)</b></p>
+								<p><b>Each time one of these tiles is removed from the board, the board will be mirrored, so all tiles on the left will be swapped to the right and vice versa.</b></p>
+								<p><b>(You can counter this effect by playing an even number of mirror tiles at once!)</b></p>
 							</div>
 							<div v-else-if="level === tileVariantUnlocks[5]">
 								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
@@ -1554,10 +1858,44 @@ export default {
 							<div v-else-if="level === tileVariantUnlocks[7]">
 								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
 								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">backwards tiles</span>!</b></p>
-								<div class="tile tileU" style="margin-left: auto; margin-right: auto">
+								<div class="tile tileB" style="margin-left: auto; margin-right: auto">
 									<div class="fixed-height"><p>B</p></div>
 								</div>
 								<p><b>Backwards tiles have no special effect - they're just meant to be distracting and uncomfortable. :)</b></p>
+							</div>
+							<div v-else-if="level === tileVariantUnlocks[8]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">flip tiles</span>!</b></p>
+								<div class="tile tileF" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>F</p></div>
+								</div>
+								<p><b>Each time one of these tiles is removed from the board, the board will be flipped upside-down!</b></p>
+								<p><b>(You can counter this effect by playing an even number of flip tiles at once!)</b></p>
+							</div>
+							<div v-else-if="level === tileVariantUnlocks[9]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">transpose tiles</span>!</b></p>
+								<div class="tile tileT" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>R</p></div>
+								</div>
+								<p><b>Each time one of these tiles is removed from the board, the board will be transposed, so that columns will become rows and vice versa.</b></p>
+								<p><b>(You can counter this effect by playing an even number of transpose tiles at once!)</b></p>
+							</div>
+							<div v-else-if="level === tileVariantUnlocks[10]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">frozen tiles</span>!</b></p>
+								<div class="tile tileI" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>F</p></div>
+								</div>
+								<p><b>Frozen tiles will never move after being dropped into the grid - even if the tiles under them are removed!</b></p>
+							</div>
+							<div v-else-if="level === tileVariantUnlocks[11]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">upside-down tiles</span>!</b></p>
+								<div class="tile tileU" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>U</p></div>
+								</div>
+								<p><b>Upside-down tiles have no special effect - they're just meant to be distracting and uncomfortable. :)</b></p>
 							</div>
 							<div v-else-if="level === probabilityChangeUnlocks[0]">
 								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
@@ -1613,7 +1951,7 @@ export default {
 						<div class="modal-footer">
 							<span v-if="userID == null">
 								<button type="button" class="btn btn-secondary button3" data-bs-dismiss="modal" @click="openLoginModal()">Log In to Save Results</button>
-								<a class="ms-3" href="play.php"><button type="button" class="btn btn-secondary button2">Play Again</button></a>
+								<a class="ms-3" href="index.php"><button type="button" class="btn btn-secondary button2">Home</button></a>
 							</span>
 							<a v-else href="leaderboard.php"><button type="button" class="btn btn-secondary button3">Continue</button></a>
 						</div>
@@ -1631,11 +1969,11 @@ export default {
 							<p class="formheading subheading">Password</p>
 							<input class="form-control score3" type="password" name="password" id="password" /><br />
 							<p class="formheading" v-if="loginError === 1">Login information is incorrect; please try again!</p>
-							<button class="btn btn-secondary button3" type="submit">Log In</button>
+							<button class="btn btn-secondary button3" type="submit" @click="login()">Log In</button>
 						</div>
 						<div class="modal-footer">
 							<p style="text-align: right">Don't have an account? <a class="signuplink score1" href="#" data-bs-dismiss="modal" @click="openSignupModal()">Click here to sign up!</a><br />No email address required.</p>
-							<p>Or, <a class="loginlink score4" href="play.php">click here to play again.</a></p>
+							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
 						</div>
 					</div>
 				</div>
@@ -1651,11 +1989,11 @@ export default {
 							<input class="form-control score1" type="text" name="username" id="username_signup" /><br />
 							<p class="formheading subheading">Password</p>
 							<input class="form-control score1" type="password" name="password" id="password_signup" /><br />
-							<button class="btn btn-secondary button1" type="submit">Sign Up</button>
+							<button class="btn btn-secondary button1" type="submit" @click="signup()">Sign Up</button>
 						</div>
 						<div class="modal-footer">
 							<p>Already have an account? <a class="loginlink score3" href="#" data-bs-dismiss="modal" @click="openLoginModal()">Click here to log in!</a></p>
-							<p>Or, <a class="loginlink score4" href="play.php">click here to play again.</a></p>
+							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
 						</div>
 					</div>
 				</div>
@@ -1707,7 +2045,7 @@ export default {
 							</td>
 							<td rowspan="2">
 								<p class="subheading">BANKED</p>
-								<div :class="'tile ' + (bankedTile === '' ? '' : (bankedTile[1] !== '0' ? 'gemtile tile'+bankedTile[1] : ''))">
+								<div :class="'tile ' + (bankedTile === '' ? '' : (bankedTile === '' ? 'emptytile' : ((bankedTile[1] !== '0' ? (bankedTile.length < 4 || !['W'].includes(bankedTile[3]) ? 'gemtile tile'+bankedTile[1] : '') : '') + ' ' + (bankedTile.length >= 4 ? 'tile' + bankedTile[3] : ''))))">
 									<div class="fixed-height"><p>{{(bankedTile === '' ? "&nbsp;" : (bankedTile.length >= 4 && bankedTile[3] === 'M' ? '?' : bankedTile[0]))}}</p></div>
 									<span class="tooltiptext" v-if="bankedTile !== '' && !['0','~','@'].includes(bankedTile[1])">{{gemTitles[bankedTile[1]]}}</span>
 									<span class="tooltiptext" v-if="bankedTile.length >= 4 && ![' '].includes(bankedTile[3])">{{gemTitles[bankedTile[3]]}}</span>
@@ -1735,7 +2073,7 @@ export default {
 						</tr>
 					</table>
 					<br />
-					<table :class="'box' + (isFlipping ? ' gridflip' : '') + (turnsCloaked > 0 ? ' gridcloaked' : '')">
+					<table :class="'box' + (isMirroring ? ' gridmirror' : '') + (isFlipping ? ' gridflip' : '') + (isTransposing ? ' gridtranspose' : '') + (turnsCloaked > 0 ? ' gridcloaked' : '')">
 						<tr v-for="(row, rowIndex) in grid">
 							<td :class="'tile ' + (tile === '' ? 'emptytile' : ((tile[1] !== '0' ? (tile[1] === '~' ? 'gemspin' : (tile[1] === '@' ? 'warpspin' : (tile.length < 4 || !['W'].includes(tile[3]) ? 'gemtile tile'+tile[1] : ''))) : '') + ' ' + (tile.length >= 4 ? 'tile' + tile[3] : '') + ' ' + (tile[2] === 'X' ? 'vanquishX' : (tile[2] === 'Y' ? 'vanquishY' : (tile[2] === 'Z' ? 'vanquishZ' : '')))))" v-for="(tile, colIndex) in row">
 								<div class="fixed-height"><p>{{tile[0]}}</p></div>
