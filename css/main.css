@@ -68,7 +68,12 @@ body
 }
 body::selection
 {
-	background-color: black;
+	background-color: var(--5b);
+	color: black;
+}
+body:not(.darkmode)::selection
+{
+    background-color: black;
 	color: var(--5b);
 }
 
@@ -165,7 +170,7 @@ body:not(.darkmode) .startbutton
 	border-color: var(--fontColour);
 	color: var(--fontColour);
 }
-body.darkmode .startbutton
+body.darkmode .startbutton, body.darkmode .showusername
 {
 	-webkit-animation: colourchange-dark 10s linear infinite;
 	-moz-animation: colourchange-dark 10s linear infinite;
@@ -571,6 +576,55 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
 	color: white;
 	border-color: #141414;
 }
+/*.tileL {
+  --s: 11px;
+  --c1: #e4f2f7;
+  --c2: #b2ddeb;
+  
+  --_g: #0000 83%,var(--c1) 85% 99%,#0000 101%;
+  background:
+    radial-gradient(27% 29% at right ,var(--_g)) calc(var(--s)/ 2) var(--s),
+    radial-gradient(27% 29% at left  ,var(--_g)) calc(var(--s)/-2) var(--s),
+    radial-gradient(29% 27% at top   ,var(--_g)) 0 calc(var(--s)/ 2),
+    radial-gradient(29% 27% at bottom,var(--_g)) 0 calc(var(--s)/-2)
+    var(--c2);
+  background-size: calc(2*var(--s)) calc(2*var(--s));
+  border-color: #608d9c;
+}*/
+/*.tileL {
+  --s: 11px;
+  --c1: #e4f2f7;
+  --c2: #b2ddeb;
+  --c3: #b2ddeb;
+  
+  --b: calc(var(--s)/3.67);
+  
+  --_r: calc(1.28*var(--s) + var(--b)/2) at top 50%;
+  --_f: calc(99.5% - var(--b)),var(--c1) calc(101% - var(--b)) 99.5%,#0000 101%;
+  --_g0: calc(-.8*var(--s)), var(--c2) var(--_f);
+  --_g1: calc(-.8*var(--s)), var(--c3) var(--_f);
+  --_s: calc(1.8*var(--s) + var(--b));
+  background: 
+    radial-gradient(var(--_r) right var(--_g0)) calc(-1*var(--_s)) var(--s),
+    radial-gradient(var(--_r) left  var(--_g1))         var(--_s)  calc(-1*var(--s)),
+    radial-gradient(var(--_r) right var(--_g1)) calc(var(--_s)/-2) calc(-1*var(--s)),
+    radial-gradient(var(--_r) left  var(--_g0)) calc(var(--_s)/ 2) var(--s),
+    linear-gradient(90deg,var(--c2) 50%,var(--c3) 0);
+  background-size: var(--_s) calc(4*var(--s));
+}*/
+.tileL {
+  --s: 22px; /* control the size*/
+  --c1: #e0f7ff;
+  --c2: #c2f0ff;
+  
+  --_g: 90deg,#0000 0; 
+  background:
+    conic-gradient(from 135deg,var(--c1) var(--_g)) var(--s) calc(var(--s)/2),
+    conic-gradient(from 135deg,var(--c2) var(--_g)),
+    conic-gradient(from 135deg at 50% 0,var(--c1) var(--_g)) var(--c2); 
+  background-size: calc(2*var(--s)) var(--s);
+  border-color: #608d9c;
+}
 .tileB p
 {
 	transform: rotateY(180deg);
@@ -592,6 +646,23 @@ body:not(.darkmode) .startbutton:active, body:not(.darkmode) .startbutton:focus,
     linear-gradient( 45deg,var(--_l)) var(--c2);
   background-size: var(--s) var(--s);
   border-color: #3fc4ae;
+}
+.tileN
+{
+  --s: 15px; /* control the size*/
+  --c1: #e4f7bc;
+  --c2: #bbcc97;
+  
+  --c:#0000 71%,var(--c1) 0 79%,#0000 0;
+  --_s:calc(var(--s)/2)/calc(2*var(--s)) calc(2*var(--s));
+  background:
+    linear-gradient(45deg,var(--c))
+     calc(var(--s)/-2) var(--_s),
+    linear-gradient(135deg,var(--c))
+     calc(var(--s)/2) var(--_s),
+    radial-gradient(var(--c1) 35%,var(--c2) 37%)
+     0 0/var(--s) var(--s);
+  border-color: #80915c;
 }
 .tileS
 {
@@ -768,6 +839,13 @@ blue/purple tests:
 .levelupScore
 {
 	font-size: 20px;
+}
+.moveScore
+{
+	font-family: Righteous;
+	font-weight: 400;
+	font-size: 22px;
+	height: 21px;
 }
 
 /* for coloured/glowing text - depends on whether light/dark mode is activated */
@@ -1211,7 +1289,100 @@ body.darkmode .leaderboard tr:nth-child(5n+1)
   display: block;
 }
 
+.sharemsg
+{
+	border: 2px solid black;
+	background-color: var(--4a);
+	color: black;
+	font-size: 20px;
+	z-index: 1000;
+	width: 300px;
+	border-radius: 3px;
+	position: fixed;
+	left: calc(50% - 150px);
+	top: 15px;
+	visibility: hidden;
+	animation: 2s flashmsg-anim;
+}
+.savemsg
+{
+	border: 2px solid black;
+	background-color: var(--3a);
+	color: black;
+	font-size: 20px;
+	z-index: 1000;
+	width: 300px;
+	border-radius: 3px;
+	position: fixed;
+	left: calc(50% - 150px);
+	top: 15px;
+	visibility: hidden;
+	animation: 2s flashmsg-anim;
+}
+.saveerrmsg
+{
+	border: 2px solid black;
+	background-color: var(--1a);
+	color: black;
+	font-size: 20px;
+	z-index: 1000;
+	width: 300px;
+	border-radius: 3px;
+	position: fixed;
+	left: calc(50% - 150px);
+	top: 15px;
+	visibility: hidden;
+	animation: 2s flashmsg-anim;
+}
+@keyframes flashmsg-anim {
+	0%
+	{
+		z-index: 20;
+		opacity: 0;
+		visibility: visible;
+	}
+	10%
+	{
+		opacity: 0.8;
+	}
+	20%
+	{
+		opacity: 1;
+	}
+	80%
+	{
+		opacity: 1;
+		z-index: 20;
+		visibility: visible;
+	}
+	100%
+	{
+		opacity: 0;
+		z-index: -1;
+		visibility: hidden;
+	}
+}
+
+.showusername
+{
+	position: absolute;
+	bottom: 5px;
+	left: 15px;
+}
+body.darkmode .showusername
+{
+	color: var(--5b);
+	border-width: 0px;
+}
+
 /* removes sidebar table and moves table on small screens */
+@media(max-width: 880px)
+{
+	.bigheading
+	{
+		font-size: calc(20*min(1vw, 1vh)) !important;
+	}
+}
 @media(max-width: 767.99px)
 {
 	.col-sm-0
@@ -1221,5 +1392,31 @@ body.darkmode .leaderboard tr:nth-child(5n+1)
 	.tile
 	{
 		border-style: solid;
+	}
+	.moveScore
+	{
+		margin-top: 10px;
+	}
+}
+@media(max-width: 575.99px)
+{
+	.header .fa-xl
+	{
+		margin-left: 10px;
+	}
+	.fa-circle-question
+	{
+		margin-right: 10px;
+	}
+	.startbuttongroup
+	{
+		top: 35%;
+	}
+}
+@media(max-width: 440px)
+{
+	.header .heading
+	{
+		font-size: 55px;
 	}
 }
