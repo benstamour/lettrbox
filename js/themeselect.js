@@ -8,15 +8,15 @@ if(sessionStorage.getItem("theme") != null)
 
 let properties = ['backgroundColour', 'fontColour'];
 const themes = [
-	[ // light mode
-		'white',
-		'black',
-		'light'
-	],
 	[ // dark mode
 		'black',
 		'white',
 		'dark'
+	],
+	[ // light mode
+		'white',
+		'black',
+		'light'
 	]
 ];
 
@@ -27,11 +27,11 @@ function setTheme(change = false)
 	{
 		if(document.getElementById("darkmodeswitch").checked)
 		{
-			theme = 1;
+			theme = 0;
 		}
 		else
 		{
-			theme = 0;
+			theme = 1;
 		}
 	}
 	else
@@ -41,7 +41,7 @@ function setTheme(change = false)
 			theme = sessionStorage.getItem("theme");
 		}
 	}
-	if(theme == 1)
+	if(theme == 0)
 	{
 		document.getElementById("darkmodeswitch").checked = true;
 	}
@@ -49,7 +49,25 @@ function setTheme(change = false)
 	{
 		document.getElementById("darkmodeswitch").checked = false;
 	}
-	sessionStorage.setItem("theme", theme);
+	
+	let params = new URLSearchParams(document.location.search);
+	let from = params.get("from");
+	if(from && from === 'portfolio')
+	{
+		console.log(theme);
+		if([0,1,6,8].includes(parseInt(theme)))
+		{
+			theme = 0;
+		}
+		else
+		{
+			theme = 1;
+		}
+	}
+	else
+	{
+		sessionStorage.setItem("theme", theme);
+	}
 
 	let r = document.querySelector(':root');
 	const themevars = themes[theme];
@@ -63,7 +81,7 @@ function setTheme(change = false)
 	let mode;
 	mode = themes[theme][2];
 	
-	let modals = ["settingsModal", "infoModal", "levelModal", "infoModalStart", "gameOverModal", "loginModal", "signupModal"];
+	let modals = ["settingsModal", "infoModal", "levelModal", "infoModalStart", "gameOverModal", "loginModal", "signupModal", "loginModal2", "signupModal2"];
 	for(let i = 0; i < modals.length; i++)
 	{
 		if(document.getElementById(modals[i]))

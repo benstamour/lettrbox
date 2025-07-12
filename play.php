@@ -2,12 +2,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Lettris - Play</title>
+		<title>Lettrbox | Play</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-		<meta name="keywords" content="Lettris, words, letters, spelling" />  
+		<meta name="keywords" content="Lettrbox, words, letters, spelling, puzzle, game" />  
 		<meta name="description" content="A word game where the goal is to spell words by dropping letter tiles into a grid without letting it fill completely." />
 		
 		<link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -36,26 +36,35 @@
 		</script>
 		
 		<!-- CSS -->
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/main.css?v=<?=time();?>">
 		
-		<script src="js/themeselect.js"></script>
+		<script src="js/themeselect.js?v=<?=time();?>"></script>
 	</head>
 	
 	<body>
-		<?php include("_loader.php"); ?>
+		<?php
+			include("_loader.php");
+		?>
 		<div class="header">
 			<div style="flex-basis: 50%;">
 				<a class="iconlink" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
 					<i class="fa-solid fa-gear fa-xl" style="color: #a3f5f7"></i>
 				</a>
-				<a class="iconlink" style="margin-right: 15px" href="#" data-bs-toggle="modal" data-bs-target="#infoModal">
+				<a class="iconlink" href="#" data-bs-toggle="modal" data-bs-target="#infoModal">
 					<i class="fa-regular fa-circle-question fa-xl" style="color: #f7a3e8"></i>
+				</a>
+				<a id="savebutton" class="iconlink d-none d-sm-inline-block" style="margin-right: 20px" href="#" onclick="event.preventDefault();">
+					<i class="fa-regular fa-floppy-disk fa-xl" style="color: #a3f7bc"></i>
 				</a>
 			</div>
 			<div class="heading m-3" style="text-align: center">
-				<a href="index.php" style="text-decoration: none"><span style="color: #ffe76b">L</span><span style="color: #c5a6f7">E</span><span style="color: #a3f7bc">T</span><span style="color: #a3f7bc">T</span><span style="color: #f7a3e8">R</span><span style="color: #a3f5f7">I</span><span style="color: #efebf0">S</span></a>
+				<a href="index.php" style="text-decoration: none"><span style="color: #ffe76b">L</span><span style="color: #c5a6f7">E</span><span style="color: #a3f7bc">T</span><span style="color: #a3f7bc">T</span><span style="color: #f7a3e8">R</span><span style="color: #a3f5f7">B</span><span style="color: #efebf0">O</span><span style="color: #c5a6f7">X</span></a>
 			</div>
-			<div style="flex-basis: 50%;"></div>
+			<div style="flex-basis: 50%; text-align: right;">
+				<a id="savebutton_mobile" class="iconlink d-sm-none" style="margin-right: 20px" href="#" onclick="event.preventDefault();">
+					<i class="fa-regular fa-floppy-disk fa-xl" style="color: #a3f7bc"></i>
+				</a>
+			</div>
 		</div>
 		
 		<?php include('_modals.php'); ?>
@@ -64,7 +73,7 @@
 		
 		<script type="module">
 			import { createApp } from 'vue';
-			import app from './js/app.js';
+			import app from './js/app.js?v=<?=time();?>';
 			createApp(app).mount('#app');
 		</script>
 		
