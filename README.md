@@ -8,5 +8,5 @@ The game allows input from the keyboard and also provides on-screen buttons for 
 
 You can play the game at **[lettrbox.kesug.com](https://lettrbox.kesug.com)**, where you can also create an account to join the leaderboard on the website!
 
-Here is a sample screenshot of a game in progress:
+Here is a sample of a game in progress:
 ![Sample Gameplay](https://github.com/benstamour/lettris/blob/main/lettrbox.gif?raw=true "Sample Gameplay")
