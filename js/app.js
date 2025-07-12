@@ -46,8 +46,20 @@ export default {
 		var userID = ref(sessionStorage.getItem("userid"));
 		var loginError = ref(0);
 		
+		var showShareCopied = ref(false);
+		var showSaved = ref(false);
+		var showSaveError = ref(false);
+		
+		/*let params = new URLSearchParams(document.location.search);
+		let from = params.get("from");
+		if(from && from === 'portfolio')
+		{
+			paused.value = false;
+		}*/
+		
 		var validWords = [];
-		fetch('wordlists/wordlist-20210729.txt')
+		let timestr = new Date().getTime();
+		fetch('wordlists/wordlist-20210729.txt?v=' + timestr)
 			.then(response => response.text())
 			.then((data) => {
 				validWords = data.toUpperCase().split("\n");
@@ -68,21 +80,21 @@ export default {
 		{
 			grid.value.push(Array(width).fill(""));
 		}
-		//grid.value[5][0] = "Y1";
+		//grid.value[5][0] = "Y0";
 		//grid.value[5][1] = "E2";
 		//grid.value[5][2] = "L3";
 		//grid.value[5][3] = "L4";
-		//grid.value[5][4] = "O0 V";
+		//grid.value[5][4] = "O0";
 		//grid.value[5][5] = "W6";
 		//grid.value[0][0] = "D0";
 		//grid.value[1][0] = "O0";
-		//grid.value[2][0] = "N0 F";
-		//grid.value[3][0] = "K0 V";
-		//grid.value[4][0] = "E0 U";
-		//grid.value[0][5] = "P0 P";
-		//grid.value[1][5] = "H0 W";
-		//grid.value[2][5] = "O0 R";
-		//grid.value[3][5] = "N0 C";
+		//grid.value[2][0] = "N0";
+		//grid.value[3][0] = "K0";
+		//grid.value[4][0] = "E0";
+		//grid.value[0][5] = "P0";
+		//grid.value[1][5] = "H0";
+		//grid.value[2][5] = "O0";
+		//grid.value[3][5] = "N0";
 		//grid.value[4][5] = "E7";
 		//grid.value[4][2] = "C0";
 		//grid.value[2][2] = "I0 I";
@@ -93,8 +105,18 @@ export default {
 		//grid.value[3][2] = "E0";
 		//grid.value[3][3] = "X0";
 		
+		//grid.value[3][0] = "X0 L";
+		//grid.value[3][1] = "Y0 L";
+		//grid.value[3][2] = "Z0";
+		//grid.value[4][0] = "R0";
+		//grid.value[4][1] = "E0";
+		//grid.value[4][2] = "D0";
+		//grid.value[5][0] = "A0";
+		//grid.value[5][1] = "B0 L";
+		//grid.value[5][2] = "C0 L";
+		
 		// frequency of letters
-		const letterWeights = [
+		var letterWeights = [
 			9, 2, 2, 5, 13,
 			2, 3, 4, 8, 1,
 			1, 4, 2, 5, 8,
@@ -167,10 +189,10 @@ export default {
 		}
 		
 		// probability of basic tile, petrified tile, mystery tile, etc.
-		var tileVariantWeights = [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-		const variants = [' ', 'P', 'M', 'W', 'R', 'C', 'V', 'B', 'F', 'T', 'I', 'U'];
-		const tileVariantUnlocks = [0, 5, 8, 11, 20, 17, 14, 41, 26, 38, 32, 44]; // levels at which tile variants are unlocked
-		const probabilityChangeUnlocks = [23, 29, 35]; // levels at which tile probabilities change: double, halve, remove
+		var tileVariantWeights = [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		const variants = [' ', 'P', 'M', 'W', 'R', 'C', 'V', 'B', 'F', 'T', 'I', 'U', 'L', 'N'];
+		const tileVariantUnlocks = [0, 5, 8, 11, 17, 14, 20, 47, 23, 29, 26, 50, 32, 35]; // levels at which tile variants are unlocked
+		const probabilityChangeUnlocks = [38, 41, 44]; // levels at which tile probabilities change: double, halve, remove
 		
 		Array.prototype.randomize = function()
 		{
@@ -337,6 +359,16 @@ export default {
 			{
 				// unlock upside-down tiles
 				tileVariantWeights[11] = 3;
+			}
+			else if(level.value === tileVariantUnlocks[12])
+			{
+				// unlock floating tiles
+				tileVariantWeights[12] = 5;
+			}
+			else if(level.value === tileVariantUnlocks[13])
+			{
+				// unlock infected tiles
+				tileVariantWeights[13] = 5;
 			}
 			else if(probabilityChangeUnlocks.includes(level.value))
 			{
@@ -811,7 +843,7 @@ export default {
 			}
 			
 			let moveMultiplier = numWords/2 + 0.5; // bonus for number of words formed
-			moveScore *= moveMultiplier;
+			moveScore *= moveMultiplier * comboMultiplier; // comboMultiplier applies if consecutive words are made without dropping additional tiles
 			moveScore = Math.floor(moveScore);
 			
 			// determine if gem tile should be given next
@@ -1097,14 +1129,16 @@ export default {
 			else
 			{
 				let warpFound = false;
+				let infectedFound = false;
 				if(!lastFoundWords)
 				{
-					// update warp tiles
+					// update warp tiles / infect tiles
 					for(let i = 0; i < height; i++)
 					{
 						for(let j = 0; j < width; j++)
 						{
 							let tileval = grid.value[i][j];
+							// warp tiles
 							if(tileval.length >= 4 && tileval[3] === "W")
 							{
 								warpFound = true;
@@ -1128,10 +1162,54 @@ export default {
 									}, 250);
 								}, 250);
 							}
+							// infected tiles
+							else if(tileval.length >= 4 && tileval[3] === "N")
+							{
+								if(Math.random() < 0.15)
+								{
+									let neighbouringTiles = [];
+									let checks = [];
+									if(j-1 >= 0) { checks.push([i,j-1]); }
+									if(j+1 < width) { checks.push([i,j+1]); }
+									if(i-1 >= 0) { checks.push([i-1,j]); }
+									if(i+1 < height) { checks.push([i+1,j]); }
+									
+									for(let k = 0; k < checks.length; k++)
+									{
+										let coords = checks[k];
+										if(canUpgradeTile(grid.value[coords[0]][coords[1]]))
+										{
+											neighbouringTiles.push(coords);
+										}
+									}
+									if(neighbouringTiles.length > 0)
+									{
+										infectedFound = true;
+										let index = Math.floor(Math.random()*neighbouringTiles.length);
+										let coords = neighbouringTiles[index];
+										
+										let infectedTileval = grid.value[coords[0]][coords[1]];
+										
+										let infectedWait = setTimeout(function()
+										{
+											grid.value[coords[0]][coords[1]] = infectedTileval[0] + '@' + infectedTileval.slice(2);
+										
+											let infectTile = setTimeout(function()
+											{
+												grid.value[coords[0]][coords[1]] = tileval;
+												let allowDrop = setTimeout(function(){
+													canDrop = true;
+												}, 200);
+											}, 250);
+										}, 250);
+									}
+								}
+							}
 						}
 					}
 				}
-				if(!upgrading && !warpFound)
+				
+				if(!upgrading && !warpFound && !infectedFound)
 				{
 					canDrop = true;
 				}
@@ -1154,6 +1232,26 @@ export default {
 					if(grid.value[0][j] === "")
 					{
 						return;
+					}
+					else // check to see if there's a floating tile that can be pushed down
+					{
+						let floatingExists = false;
+						for(let i = 0; i < height; i++)
+						{
+							let tileval = grid.value[i][j];
+							if(floatingExists && grid.value[i][j] === "")
+							{
+								return;
+							}
+							else if(tileval.length >= 4 && tileval[3] === "L")
+							{
+								floatingExists = true;
+							}
+							else if(tileval.length >= 4 && tileval[3] === "I")
+							{
+								break;
+							}
+						}
 					}
 				}
 				
@@ -1206,6 +1304,14 @@ export default {
 			}
 		}
 		
+		function canUpgradeTile(tileval)
+		{
+			if(tileval !== "" && tileval[1] === '0' && (tileval.length < 4 || !['P', 'W', 'R', 'C', 'V', 'F', 'I', 'T', 'L', 'N', 'S'].includes(tileval[3])))
+			{
+				return true;
+			}
+			return false;
+		}
 		function upgradeRandomGridTile(tileType)
 		{
 			let rows = Array.from(Array(height).keys());
@@ -1219,7 +1325,7 @@ export default {
 				for(let j = 0; j < cols.length; j++)
 				{
 					let tileval = grid.value[rows[i]][cols[j]];
-					if(tileval !== "" && tileval[1] === '0' && (tileval.length < 4 || !['P', 'W', 'R', 'C', 'V', 'F', 'I', 'T', 'S'].includes(tileval[3])))
+					if(canUpgradeTile(tileval))
 					{
 						foundUpgrade = true;
 						grid.value[rows[i]][cols[j]] = tileval.substring(0,1) + '~' + tileval.substring(2);
@@ -1268,18 +1374,92 @@ export default {
 				for(let j = 0; j < width; j++)
 				{
 					let lowestBlank = height-1;
+					let frozens = [];
+					let floatings = [];
+					
 					for(let i = height-1; i >= 0; i--)
 					{
 						let tileval = grid.value[i][j];
 						if(tileval.length >= 4 && tileval[3] === 'I')
 						{
 							lowestBlank = i-1;
+							frozens.push(i);
+							//frozens.splice(0, 0, i);
 						}
 						else if(tileval !== "")
 						{
 							grid.value[i][j] = "";
 							grid.value[lowestBlank][j] = tileval;
+							
+							if(tileval.length >= 4 && tileval[3] === 'L')
+							{
+								floatings.splice(0, 0, lowestBlank);
+							}
+							
 							lowestBlank--;
+						}
+					}
+					
+					if(floatings.length > 0)
+					{
+						let f = 0;
+						while(f < floatings.length)
+						{
+							let floatIndex = floatings[f];
+							let ceilIndex = -1;
+							for(let c = 0; c < frozens.length; c++)
+							{
+								if(frozens[c] < floatIndex)
+								{
+									ceilIndex = frozens[c];
+									break;
+								}
+							}
+							for(let c = 0; c < floatings.length; c++)
+							{
+								if(floatings[c] < floatIndex && floatings[c] > ceilIndex)
+								{
+									ceilIndex = floatings[c];
+								}
+							}
+							let firstBlank = ceilIndex+1;
+							let firstItem = firstBlank;
+							
+							for(let i = ceilIndex+1; i <= floatIndex; i++)
+							{
+								if(grid.value[i][j] !== "")
+								{
+									firstItem = i;
+									break;
+								}
+							}
+							
+							let distance = firstItem - firstBlank;
+							
+							for(let i = firstItem; i <= floatIndex; i++)
+							{
+								if(grid.value[i-distance][j] === "")
+								{
+									grid.value[i-distance][j] = grid.value[i][j];
+									grid.value[i][j] = "";
+								}
+								else
+								{
+									break;
+								}
+							}
+							
+							// reset floatings with new locations
+							floatings = [];
+							for(let i = height-1; i >= 0; i--)
+							{
+								let tileval = grid.value[i][j];
+								if(tileval.length >= 4 && tileval[3] === 'L')
+								{
+									floatings.splice(0, 0, i);
+								}
+							}
+							f++;
 						}
 					}
 				}
@@ -1332,6 +1512,7 @@ export default {
 					}
 				}
 				let letter = halveOptions[Math.floor(Math.random()*halveOptions.length)];
+				halvedLetter = letter;
 				console.log("halving " + letter);
 				letterWeights[letter.charCodeAt(0)-65] *= 0.5;
 			}
@@ -1340,7 +1521,7 @@ export default {
 				let removeOptions = [];
 				for(let i = 65; i <= 90; i++)
 				{
-					if(letterPoints[String.fromCharCode(i)] < 1.5 && letterWeights[i-65] > 0 && !['U',halvedLetter].includes(String.fromCharCode(i))) // don't remove U because we want to give people a chance with a Q
+					if(letterPoints[String.fromCharCode(i)] < 1.5 && letterWeights[i-65] > 0 && !['U','A','E','S','T',halvedLetter].includes(String.fromCharCode(i))) // don't remove U so people still have a chance with a Q
 					{
 						removeOptions.push(String.fromCharCode(i));
 					}
@@ -1359,7 +1540,7 @@ export default {
 		{
 			if(!paused.value)
 			{
-				if(canDrop && (keychar === 'ArrowDown' || keychar === 'Enter'))
+				if(canDrop && (['ArrowDown', 'Enter', 's'].includes(keychar)))
 				{
 					let blockHeight = 0;
 					var lowestRow = height-1;
@@ -1404,26 +1585,86 @@ export default {
 					//console.log("highest row = " + highestRow);
 					if(highestRow < 0)
 					{
-						//console.log("game over");
+						let validDrop = false;
+						for(let k = 0; k < width; k++)
+						{
+							let j = maxBlockHeight-1;
+							if(nextBlock.value[j][k] !== '')
+							{
+								let floatingExists = false;
+								for(let i = 0; i < height; i++)
+								{
+									let tileval = grid.value[i][k];
+									if(floatingExists && grid.value[i][k] === "")
+									{
+										// i = gap under floating tile
+										for(let index = i; index > 0; index--)
+										{
+											grid.value[index][k] = grid.value[index-1][k];
+											grid.value[index-1][k] = "";
+										}
+										grid.value[0][k] = nextBlock.value[j][k];
+										
+										validDrop = true;
+										break;
+									}
+									else if(tileval.length >= 4 && tileval[3] === "L")
+									{
+										floatingExists = true;
+									}
+									else if(tileval.length >= 4 && tileval[3] === "I")
+									{
+										break;
+										//console.log("game over");
+									}
+								}
+							}
+						}
+						
+						if(validDrop)
+						{
+							totalLettersDropped.value++;
+							findWords();
+							nextBlock.value = getNewBlock();
+						}
 					}
 					else
 					{
 						totalLettersDropped.value++;
 						
-						//console.log(nextBlock.value);
-						for(let i = lowestRow; i > lowestRow - blockHeight; i--)
+						let floating = false;
+						let j = maxBlockHeight-1;
+						for(let k = 0; k < width; k++)
 						{
-							//console.log('i = ' + i);
-							let j = maxBlockHeight-1 - (lowestRow - i);
-							//for(let j = maxBlockHeight-1; j >= maxBlockHeight - blockHeight; j--)
-							//console.log('j = ' + j);
-							for(let k = 0; k < width; k++)
+							if(nextBlock.value[j][k] !== '')
 							{
-								//console.log('k = ' + k);
-								if(nextBlock.value[j][k] !== '')
+								let tileval = nextBlock.value[j][k];
+								if(tileval.length >= 4 && tileval[3] === 'L')
 								{
-									//console.log('setting value');
-									grid.value[i][k] = nextBlock.value[j][k];
+									floating = true;
+									grid.value[0][k] = nextBlock.value[j][k];
+									break;
+								}
+							}
+						}
+						
+						//console.log(nextBlock.value);
+						if(!floating)
+						{
+							for(let i = lowestRow; i > lowestRow - blockHeight; i--)
+							{
+								//console.log('i = ' + i);
+								let j = maxBlockHeight-1 - (lowestRow - i);
+								//for(let j = maxBlockHeight-1; j >= maxBlockHeight - blockHeight; j--)
+								//console.log('j = ' + j);
+								for(let k = 0; k < width; k++)
+								{
+									//console.log('k = ' + k);
+									if(nextBlock.value[j][k] !== '')
+									{
+										//console.log('setting value');
+										grid.value[i][k] = nextBlock.value[j][k];
+									}
 								}
 							}
 						}
@@ -1436,10 +1677,10 @@ export default {
 						nextBlock.value = getNewBlock();
 					}
 				}
-				else if(keychar === 'ArrowLeft' || keychar === 'ArrowRight' && !gameOver.value)
+				else if(['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(keychar) && !gameOver.value)
 				{
 					let movement, colCheck;
-					if(keychar === 'ArrowLeft')
+					if(keychar === 'ArrowLeft' || keychar === 'a')
 					{
 						movement = -1;
 						colCheck = 0;
@@ -1501,7 +1742,7 @@ export default {
 						}
 					}
 				}
-				else if(keychar === 'ArrowUp')
+				else if(keychar === 'ArrowUp' || keychar === 'w')
 				{
 					if(bankedTile.value !== "")
 					{
@@ -1519,6 +1760,10 @@ export default {
 		}
 		
 		window.addEventListener('keydown', (e) => {
+			if(['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp'].includes(e.key))
+			{
+				e.preventDefault();
+			}
 			handleKeyDown(e.key);
 		});
 		
@@ -1541,6 +1786,8 @@ export default {
 			'F': "Flip Tile: Flips the gameboard when used in a word",
 			'T': "Transpose Tile: Transposes the grid so that rows become columns and vice versa",
 			'I': "Frozen Tile: Tile will not move once dropped into the gameboard, even if the tiles below it are removed",
+			'L': "Floating Tile: Clings to the top of the board instead of falling, but can be pushed down by other tiles",
+			'N': "Infected Tile: Each turn a word is not made, has a chance to turn an adjacent tile into an infected tile with the same letter",
 		};
 		
 		function openLoginModal()
@@ -1559,17 +1806,29 @@ export default {
 		{
 			let username = document.getElementById("username").value;
 			let pwd = document.getElementById("password").value;
+			
 			// send game data to be stored in database
-			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
-				"username": username,
-				"password": pwd,
-				"totalScore": totalScore.value,
-				"bestWord": bestMoves.value[0][0],
-				"bestWordScore": bestMoves.value[0][1],
-				"bestWordGem": bestMoves.value[0][2],
-				"numLetters": totalLettersDropped.value,
-				"numWords": totalWordsMade.value
-			}));
+			let data;
+			if(gameOver.value)
+			{
+				data = "gamedata=" + encodeURIComponent(JSON.stringify({
+					"username": username,
+					"password": pwd,
+					"totalScore": totalScore.value,
+					"bestWord": bestMoves.value[0][0],
+					"bestWordScore": bestMoves.value[0][1],
+					"bestWordGem": bestMoves.value[0][2],
+					"numLetters": totalLettersDropped.value,
+					"numWords": totalWordsMade.value
+				}));
+			}
+			else
+			{
+				data = "gamedata=" + encodeURIComponent(JSON.stringify({
+					"username": username,
+					"password": pwd,
+				}));
+			}
 
 			var xhr = new XMLHttpRequest();
 
@@ -1592,7 +1851,17 @@ export default {
 							loginError.value = 0;
 							let userid = xhr.responseText.split(" ")[1];
 							sessionStorage.setItem("userid", userid);
-							window.location.href = "leaderboard.php";
+							if(gameOver.value)
+							{
+								window.location.href = "leaderboard.php";
+							}
+							else
+							{
+								save();
+								//let modal = new bootstrap.Modal.getInstance(document.getElementById("loginModal"));
+								//modal.hide();
+								$('#loginModal').modal('hide');
+							}
 						}
 						else
 						{
@@ -1611,18 +1880,31 @@ export default {
 		{
 			let username = document.getElementById("username_signup").value;
 			let pwd = document.getElementById("password_signup").value;
+			
 			// send game data to be stored in database
-			let data = "gamedata=" + encodeURIComponent(JSON.stringify({
-				"signup": true,
-				"username": username,
-				"password": pwd,
-				"totalScore": totalScore.value,
-				"bestWord": bestMoves.value[0][0],
-				"bestWordScore": bestMoves.value[0][1],
-				"bestWordGem": bestMoves.value[0][2],
-				"numLetters": totalLettersDropped.value,
-				"numWords": totalWordsMade.value
-			}));
+			let data;
+			if(gameOver.value)
+			{
+				data = "gamedata=" + encodeURIComponent(JSON.stringify({
+					"signup": true,
+					"username": username,
+					"password": pwd,
+					"totalScore": totalScore.value,
+					"bestWord": bestMoves.value[0][0],
+					"bestWordScore": bestMoves.value[0][1],
+					"bestWordGem": bestMoves.value[0][2],
+					"numLetters": totalLettersDropped.value,
+					"numWords": totalWordsMade.value
+				}));
+			}
+			else
+			{
+				data = "gamedata=" + encodeURIComponent(JSON.stringify({
+					"signup": true,
+					"username": username,
+					"password": pwd,
+				}));
+			}
 
 			var xhr = new XMLHttpRequest();
 
@@ -1645,7 +1927,17 @@ export default {
 							loginError.value = 0;
 							let userid = xhr.responseText.split(" ")[1];
 							sessionStorage.setItem("userid", userid);
-							window.location.href = "leaderboard.php";
+							if(gameOver.value)
+							{
+								window.location.href = "leaderboard.php";
+							}
+							else
+							{
+								save();
+								//let modal = new bootstrap.Modal.getInstance(document.getElementById("signupModal"));
+								//modal.hide();
+								$('#signupModal').modal('hide');
+							}
 						}
 						else
 						{
@@ -1660,8 +1952,221 @@ export default {
 			};
 			xhr.send(data);
 		}
+		function share()
+		{
+			navigator.clipboard.writeText("I got a score of " + totalScore.value + " points in LETTRIS!\n\nPlay here: https://bensta.epizy.com/lettris");
+			showShareCopied.value = true;
+			let hideAlert = setTimeout(function() {
+				showShareCopied.value = false;
+			}, 2100);
+		}
+		function save()
+		{
+			if(!userID.value)
+			{
+				if(sessionStorage.getItem("userid"))
+				{
+					userID.value = sessionStorage.getItem("userid");
+				}
+				else
+				{
+					let modal = new bootstrap.Modal(document.getElementById("loginModal"));
+					modal.show();
+					return;
+				}
+			}
+			let data = "savedata=" + encodeURIComponent(JSON.stringify({
+				"userID": userID.value,
+				"grid": grid.value,
+				"startPos": startPos,
+				"nextBlock": nextBlock.value,
+				"bankedTile": bankedTile.value,
+				"totalScore": totalScore.value,
+				"totalLettersDropped": totalLettersDropped.value,
+				"totalWordsMade": totalWordsMade.value,
+				"prevMoves": prevMoves.value,
+				"bestMoves": bestMoves.value,
+				"bestMoveLevel": bestMoveLevel.value,
+				"longestWordLevel": longestWordLevel.value,
+				"bonusWord": bonusWord.value,
+				"level": level.value,
+				"turnsCloaked": turnsCloaked.value,
+				"letterWeights": letterWeights,
+				"tileVariantWeights": tileVariantWeights,
+				"nextTileType": nextTileType,
+				"canDrop": canDrop,
+				"bonusAmount": bonusAmount,
+				"comboMultiplier": comboMultiplier,
+				"lastFoundWords": lastFoundWords,
+				"halvedLetter": halvedLetter,
+			}));
+			//jsonData = JSON.stringify(data);
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open("POST", "savedata.php", true);
+
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === XMLHttpRequest.DONE)
+				{
+					if(xhr.status === 200)
+					{
+						console.log(xhr.responseText);
+						if(xhr.responseText.includes('Successfully saved data!'))
+						{
+							showSaved.value = true;
+							let hideAlert = setTimeout(function() {
+								showSaved.value = false;
+							}, 2100);
+						}
+						else
+						{
+							showSaveError.value = true;
+							let hideAlert = setTimeout(function() {
+								showSaveError.value = false;
+							}, 2100);
+						}
+					}
+					else
+					{
+						console.error("Error:", xhr.status);
+						showSaveError.value = true;
+						let hideAlert = setTimeout(function() {
+							showSaveError.value = false;
+						}, 2100);
+					}
+				}
+			};
+			xhr.send(data);
+		}
 		
-		return { grid, nextBlock, bankedTile, gemTitles, totalScore, totalLettersDropped, totalWordsMade, lastMoveScore, lastMoveGem, prevMoves, bestMoves, bestMoveLevel, longestWordLevel, maxStatLength, gameOver, bonusWord, level, paused, tileVariantUnlocks, gameStarted, handleKeyDown, userID, openLoginModal, login, openSignupModal, signup, loginError, isMirroring, isFlipping, isTransposing, turnsCloaked, probabilityChangeUnlocks, levelThresholds };
+		/*if(!userID.value || userID.value == 0)
+		{
+			//document.getElementById("savebutton").style.display = "none";
+			//document.getElementById("savebutton_mobile").style.display = "none";
+			document.getElementById("savebutton").classList.add("d-sm-inline-block");
+			document.getElementById("savebutton").onclick = (() => {event.preventDefault(); save();});
+			document.getElementById("savebutton_mobile").onclick = (() => {event.preventDefault(); save();});
+		}
+		else
+		{
+			document.getElementById("savebutton").classList.add("d-sm-inline-block");
+			document.getElementById("savebutton").onclick = (() => {event.preventDefault(); save();});
+			document.getElementById("savebutton_mobile").onclick = (() => {event.preventDefault(); save();});
+		}*/
+		
+		document.getElementById("savebutton").onclick = (() => {event.preventDefault(); save();});
+		document.getElementById("savebutton_mobile").onclick = (() => {event.preventDefault(); save();});
+		
+		if(sessionStorage.getItem("mode") === "continue")
+		{
+			let data = "startdata=" + encodeURIComponent(JSON.stringify({
+				"mode": "continue",
+				"userID": userID.value,
+			}));
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open("POST", "savedata.php", true);
+
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === XMLHttpRequest.DONE)
+				{
+					if(xhr.status === 200)
+					{
+						if(xhr.responseText.includes("SAVE DATA: "))
+						{
+							let strdata = xhr.responseText.replace("SAVE DATA: ", "");
+							let parsedData = JSON.parse(strdata);
+							//console.log(parsedData);
+							
+							if(parsedData.userID)
+							{
+								userID.value = parseInt(parsedData.userID);
+								
+								let savebutton = document.getElementById("savebutton");
+								savebutton.style.display = "inline-block";
+								
+								savebutton = document.getElementById("savebutton_mobile");
+								savebutton.style.display = "inline-block";
+							}
+							grid.value = parsedData.grid;
+							startPos = parsedData.startPos;
+							nextBlock.value = parsedData.nextBlock;
+							bankedTile.value = parsedData.bankedTile;
+							totalScore.value = parsedData.totalScore;
+							totalLettersDropped.value = parsedData.totalLettersDropped;
+							totalWordsMade.value = parsedData.totalWordsMade;
+							prevMoves.value = parsedData.prevMoves;
+							bestMoves.value = parsedData.bestMoves;
+							bestMoveLevel.value = parsedData.bestMoveLevel;
+							longestWordLevel.value = parsedData.longestWordLevel;
+							bonusWord.value = parsedData.bonusWord;
+							level.value = parsedData.level;
+							turnsCloaked.value = parsedData.turnsCloaked;
+							letterWeights = parsedData.letterWeights;
+							tileVariantWeights = parsedData.tileVariantWeights;
+							nextTileType = parsedData.nextTileType;
+							canDrop = parsedData.canDrop;
+							bonusAmount = parsedData.bonusAmount;
+							comboMultiplier = parsedData.comboMultiplier;
+							lastFoundWords = parsedData.lastFoundWords;
+							halvedLetter = parsedData.halvedLetter;
+						}
+						else
+						{
+							console.log(xhr.responseText);
+						}
+					}
+					else
+					{
+						console.error("Error:", xhr.status);
+					}
+				}
+			};
+			xhr.send(data);
+		}
+		else if(sessionStorage.getItem("mode") === "newgame")
+		{
+			let data = "startdata=" + encodeURIComponent(JSON.stringify({
+				"mode": "newgame",
+				"userID": userID.value,
+			}));
+
+			var xhr = new XMLHttpRequest();
+
+			xhr.open("POST", "savedata.php", true);
+
+			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === XMLHttpRequest.DONE)
+				{
+					if(xhr.status === 200)
+					{
+						console.log(xhr.responseText);
+					}
+					else
+					{
+						console.error("Error:", xhr.status);
+					}
+				}
+			};
+			xhr.send(data);
+		}
+		else
+		{
+			console.log("C");
+		}
+		
+		return { grid, nextBlock, bankedTile, gemTitles, totalScore, totalLettersDropped, totalWordsMade, lastMoveScore, lastMoveGem, prevMoves, bestMoves, bestMoveLevel, longestWordLevel, maxStatLength, gameOver, bonusWord, level, paused, tileVariantUnlocks, gameStarted, handleKeyDown, userID, openLoginModal, login, openSignupModal, signup, loginError, isMirroring, isFlipping, isTransposing, turnsCloaked, probabilityChangeUnlocks, levelThresholds, share, showShareCopied, showSaved, showSaveError };
 	},
 	/*watch:
 	{
@@ -1679,6 +2184,13 @@ export default {
 		
 		applySettings();
 		let startmodal = new bootstrap.Modal(document.getElementById("infoModalStart"));
+		
+		/*let params = new URLSearchParams(document.location.search);
+		let from = params.get("from");
+		if(!from || from !== 'portfolio')
+		{
+			startmodal.show();
+		}*/
 		startmodal.show();
 	},
 	template: `<div class="container-fluid">
@@ -1692,8 +2204,8 @@ export default {
 						</div>
 						<div class="modal-body">
 							<p>Drop letter tiles into the grid to spell words! Each time a word with at least three letters is formed, the tiles in the word will be removed from the grid. The game ends when the grid is completely filled!</p>
-							<p>Use the <b>left and right arrow keys</b> to decide where the next tile falls, and press the <b>down arrow key</b> or <b>enter key</b> to drop the tile immediately.</p>
-							<p>You can also use the <b>up arrow key</b> to bank a tile for later - if you already have a tile in the bank, you will be swapping your current tile for the banked one.</p>
+							<p>Use the <b>left and right arrow keys</b> or the <b>A and D keys</b> to decide where the next tile falls, and press the <b>down arrow key</b>, <b>enter key</b>, or <b>S key</b> to drop the tile immediately.</p>
+							<p>You can also use the <b>up arrow key</b> or <b>W key</b> to bank a tile for later - if you already have a tile in the bank, you will be swapping your current tile for the banked one.</p>
 							<p>If you create high-scoring words, you may encounter some <b>special tiles</b> that provide a score bonus when played! The list of special tiles is given below.</p>
 							<table class="gemtable" style="border-collapse: separate; border-spacing: 0"><tbody>
 								<tr>
@@ -1897,6 +2409,23 @@ export default {
 								</div>
 								<p><b>Upside-down tiles have no special effect - they're just meant to be distracting and uncomfortable. :)</b></p>
 							</div>
+							<div v-else-if="level === tileVariantUnlocks[12]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">floating tiles</span>!</b></p>
+								<div class="tile tileL" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>F</p></div>
+								</div>
+								<p><b>Floating tiles will cling to the top of the board instead of falling to the bottom, but you can place tiles on top of them to push them down!</b></p>
+							</div>
+							<div v-else-if="level === tileVariantUnlocks[13]">
+								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
+								<p class="mb-0"><b>You may now encounter <span :class="'score' + ((level-1)%5+1)">infected tiles</span>!</b></p>
+								<div class="tile tileN" style="margin-left: auto; margin-right: auto">
+									<div class="fixed-height"><p>I</p></div>
+								</div>
+								<p><b>Each time you drop a letter without creating a word, every infected tile in the grid has a chance to infect an adjacent tile, turning it into an infected tile with the same letter as itself.</b></p>
+								<p><b>(Gem tiles and other special tile types cannot be infected.)</b></p>
+							</div>
 							<div v-else-if="level === probabilityChangeUnlocks[0]">
 								<p :class="'subheading score' + ((level-1)%5+1)">--- NEW ---</p>
 								<p class="mb-0"><b>The frequency of one random letter has been <span :class="'score' + (level%5+1)">doubled</span>!</b></p>
@@ -1949,6 +2478,8 @@ export default {
 							</tr></tbody></table>
 						</div>
 						<div class="modal-footer">
+							<div v-if="showShareCopied" class="sharemsg">Copied results to clipboard!</div>
+							<button type="button" class="btn btn-secondary button4 ms-3" @click="share()">Share</button></a>
 							<span v-if="userID == null">
 								<button type="button" class="btn btn-secondary button3" data-bs-dismiss="modal" @click="openLoginModal()">Log In to Save Results</button>
 								<a class="ms-3" href="index.php"><button type="button" class="btn btn-secondary button2">Home</button></a>
@@ -1958,10 +2489,11 @@ export default {
 					</div>
 				</div>
 			</div>
-			<div class="modal fade loginmodal" id="loginModal" tabindex="-1" role="dialog" data-bs-theme="light" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade loginmodal" id="loginModal" tabindex="-1" role="dialog" data-bs-theme="light" :data-bs-backdrop="gameOver ? 'static' : 'true'" :data-bs-keyboard="gameOver ? 'false' : 'true'">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-body">
+							<p v-if="!gameOver">Please log in to save your progress.</p>
 							<p class="levelheading">LOG IN</p>
 							<br />
 							<p class="formheading subheading">Username</p>
@@ -1973,12 +2505,12 @@ export default {
 						</div>
 						<div class="modal-footer">
 							<p style="text-align: right">Don't have an account? <a class="signuplink score1" href="#" data-bs-dismiss="modal" @click="openSignupModal()">Click here to sign up!</a><br />No email address required.</p>
-							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
+							<p v-if="gameOver">Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="modal fade signupmodal" id="signupModal" tabindex="-1" role="dialog" data-bs-theme="light" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade signupmodal" id="signupModal" tabindex="-1" role="dialog" data-bs-theme="light" :data-bs-backdrop="gameOver ? 'static' : 'true'" :data-bs-keyboard="gameOver ? 'false' : 'true'">
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-body">
@@ -1993,11 +2525,13 @@ export default {
 						</div>
 						<div class="modal-footer">
 							<p>Already have an account? <a class="loginlink score3" href="#" data-bs-dismiss="modal" @click="openLoginModal()">Click here to log in!</a></p>
-							<p>Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
+							<p v-if="gameOver">Or, <a class="loginlink score4" href="index.php">click here to return to the home page.</a></p>
 						</div>
 					</div>
 				</div>
 			</div>
+			<div v-if="showSaved" class="savemsg">Game saved successfully!</div>
+			<div v-else-if="showSaveError" class="saveerrmsg">There was a problem saving your game.</div>
 			
 			<div class="row align-items-center">
 				<div class="col col-lg-4 col-md-3 col-sm-0 align-self-stretch">
@@ -2059,9 +2593,9 @@ export default {
 				
 					<p v-if="gameOver" class="subheading">GAME OVER</p>
 					<p v-else-if="lastMoveGem == 7 && lastMoveScore > 0" :class="'subheading moveScore score' + lastMoveGem">
-						<span v-for="(item,i) in ('+' + lastMoveScore.toString()).split('')" :class="'score' + ([1,4,2,0,3].indexOf(i%5)+1)">{{('+' + lastMoveScore.toString())[i]}}</span>
+						<span v-for="(item,i) in (prevMoves[0][0] + '(+' + lastMoveScore.toString() + ')').split('')" :class="'score' + ([1,4,2,0,3].indexOf(i%5)+1)">{{(prevMoves[0][0] + '(+' + lastMoveScore.toString() + ')')[i] === '(' ? ' (' : (prevMoves[0][0] + '(+' + lastMoveScore.toString() + ')')[i]}}</span>
 					</p>
-					<p v-else :class="'subheading moveScore score' + lastMoveGem">{{ lastMoveScore > 0 ? '+' + lastMoveScore : '&nbsp;' }}</p>
+					<p v-else :class="'subheading moveScore score' + lastMoveGem">{{ lastMoveScore > 0 ? prevMoves[0][0] + ' (+' + lastMoveScore + ')' : '&nbsp;' }}</p>
 					<br />
 					<table class="overhead">
 						<tr v-for="(row, rowIndex) in nextBlock">
@@ -2126,6 +2660,37 @@ export default {
 				<button type="button" class="btn btn-secondary buttonBank subheading" @click="handleKeyDown('ArrowUp')">BANK</button>
 			</div>
 			<br />
+			<div class="mobilemovetables d-md-none my-3 mx-3">
+				<table class="movetable"><tbody>
+					<tr><th colspan="2" class="subheading">PREVIOUS MOVES</th></tr>
+					<tr v-for="(word, wordIndex) in prevMoves">
+						<td v-if="word[2] == 7" style="text-align: left">
+							<span v-for="(item,i) in word[0].split('')" :class="'score' + ([1,4,2,0,3].indexOf(i%5)+1)">{{word[0][i]}}</span>
+						</td>
+						<td v-else :class="'score' + word[2]" style="text-align: left">{{word[0]}}</td>
+						<td v-if="word[2] == 7" style="text-align: right"><span v-for="(item,i) in word[1].toString().split('')" :class="'score' + ([1,4,2,0,3].indexOf(i-Math.floor(Math.log10(word[1])-99)%5)+1)">{{word[1].toString()[i]}}</span></td>
+						<td v-else :class="'score' + word[2]" style="text-align: right">{{word[1]}}</td>
+					</tr>
+					<tr v-for="i in (maxStatLength-prevMoves.length)">
+						<td>&nbsp;</td>
+					</tr>
+				</tbody></table>
+				<br />
+				<table class="movetable"><tbody>
+					<tr><th colspan="2" class="subheading">BEST MOVES</th></tr>
+					<tr v-for="(word, wordIndex) in bestMoves" :class="'score' + word[2]">
+						<td v-if="word[2] == 7" style="text-align: left">
+							<span v-for="(item,i) in word[0].split('')" :class="'score' + ([1,4,2,0,3].indexOf(i%5)+1)">{{word[0][i]}}</span>
+						</td>
+						<td v-else :class="'score' + word[2]" style="text-align: left">{{word[0]}}</td>
+						<td v-if="word[2] == 7" style="text-align: right"><span v-for="(item,i) in word[1].toString().split('')" :class="'score' + ([1,4,2,0,3].indexOf(i-Math.floor(Math.log10(word[1])-99)%5)+1)">{{word[1].toString()[i]}}</span></td>
+						<td v-else :class="'score' + word[2]" style="text-align: right">{{word[1]}}</td>
+					</tr>
+					<tr v-for="i in (maxStatLength-prevMoves.length)">
+						<td>&nbsp;</td>
+					</tr>
+				</tbody></table>
+			</div>
 		</div>
 	</div>`
 }
