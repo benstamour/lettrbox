@@ -6,7 +6,7 @@ If the player spells words that are long enough or high-scoring, they may receiv
 
 The game allows input from the keyboard and also provides on-screen buttons for touchscreen users, and a toggle between light mode and dark mode is provided. The code in this repository was built using Vue.js, JavaScript, CSS, HTML, and Bootstrap, and the website also uses AJAX and PHP.
 
-You can play the game at **[lettrbox.kesug.com](https://lettrbox.kesug.com)**, where you can also create an account to join the leaderboard on the website!
+You can play the game at **[lettrbox.kesug.com](https://lettrbox.kesug.com)**, where you can also create an account to save your progress and join the leaderboard on the website!
 
 Here is a sample of a game in progress:
 ![Sample Gameplay](https://github.com/benstamour/lettris/blob/main/lettrbox.gif?raw=true "Sample Gameplay")
